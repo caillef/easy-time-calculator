@@ -27,9 +27,9 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
   
   return (
     <div className={`flex items-center text-sm py-4 ${allAvailable ? 'bg-green-100 rounded-md' : ''}`}>
-      <div className="w-12 text-gray-500 text-center">{timeSlot}</div>
+      <div className="w-12 min-w-[48px] text-gray-500 text-center">{timeSlot}</div>
       
-      <div className="flex-1 flex justify-center items-center space-x-3">
+      <div className="flex-1 flex flex-wrap justify-center items-center gap-3 px-2">
         {persons.map(person => {
           const discordUser = findDiscordUser(person, discordUsers);
           let status: SlotStatus = 'neutral';
