@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
@@ -13,7 +12,7 @@ interface MergedCalendarProps {
 const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 const TIMES = [
   '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', 
-  '16:00', '17:00', '18:00', '19:00', '20:00'
+  '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
 ];
 
 const PEOPLE = [
@@ -23,7 +22,6 @@ const PEOPLE = [
   { name: 'Corentin', initial: 'C' }
 ];
 
-// Helper function to get status class
 const getStatusClass = (status: SlotStatus | undefined) => {
   switch (status) {
     case 'available':
@@ -57,7 +55,6 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
         <h3 className="text-lg font-medium mb-4">Vue Combinée</h3>
         <div className="overflow-x-auto">
           <div className="merged-calendar-grid min-w-[700px]">
-            {/* Header row with day names */}
             <div className="col-start-1"></div>
             {DAYS.map((day) => (
               <div 
@@ -68,7 +65,6 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
               </div>
             ))}
             
-            {/* Time slots */}
             {TIMES.map((time) => (
               <React.Fragment key={time}>
                 <div className="flex items-center justify-end pr-4 text-xs text-muted-foreground">
