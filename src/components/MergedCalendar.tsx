@@ -1,10 +1,8 @@
-
 import React, { useMemo } from 'react';
 import { useCalendar } from '@/context/CalendarContext';
 import { SlotStatus } from './TimeSlot';
 import TransitionWrapper from './TransitionWrapper';
 import { Person } from '@/types/calendar';
-import { Badge } from '@/components/ui/badge';
 import { fetchDiscordUsers, DiscordUser } from '@/services/discordService';
 import { useQuery } from '@tanstack/react-query';
 import DiscordAvatar from './DiscordAvatar';
@@ -88,9 +86,10 @@ const MergedCalendar = () => {
                           {statuses.available.map(person => {
                             const discordUser = findDiscordUser(person);
                             return (
-                              <Badge 
+                              <div 
                                 key={person} 
-                                className="flex items-center space-x-1 bg-green-100 text-green-800 hover:bg-green-200"
+                                className="relative"
+                                title={person}
                               >
                                 {discordUser ? (
                                   <DiscordAvatar 
@@ -100,12 +99,11 @@ const MergedCalendar = () => {
                                     size="sm" 
                                   />
                                 ) : (
-                                  <span className="w-4 h-4 rounded-full bg-green-200 flex items-center justify-center text-green-800 text-xs">
+                                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-800 text-xs">
                                     {person.charAt(0)}
-                                  </span>
+                                  </div>
                                 )}
-                                <span>{person}</span>
-                              </Badge>
+                              </div>
                             );
                           })}
                         </div>

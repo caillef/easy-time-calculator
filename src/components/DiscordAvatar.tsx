@@ -25,7 +25,7 @@ const DiscordAvatar: React.FC<DiscordAvatarProps> = ({
     .join('')
     .toUpperCase();
   
-  // Size mappings
+  // Size mappings with additional classes for different contexts
   const sizeClasses = {
     sm: 'h-8 w-8',
     md: 'h-10 w-10',
@@ -33,9 +33,9 @@ const DiscordAvatar: React.FC<DiscordAvatarProps> = ({
   };
   
   return (
-    <Avatar className={sizeClasses[size]}>
-      <AvatarImage src={avatarUrl} alt={name} />
-      <AvatarFallback>{initials}</AvatarFallback>
+    <Avatar className={`${sizeClasses[size]} border-2 border-green-200 bg-green-100`}>
+      <AvatarImage src={avatarUrl} alt={name} className="object-cover" />
+      <AvatarFallback className="bg-green-100 text-green-800">{initials}</AvatarFallback>
     </Avatar>
   );
 };
