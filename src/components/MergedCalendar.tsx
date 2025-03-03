@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
@@ -36,6 +37,13 @@ const getStatusClass = (status: SlotStatus | undefined) => {
 const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
   const { calendarData, isLoading } = useCalendar();
 
+  // Helper function to check if all people are available
+  const areAllAvailable = (day: string, time: string): boolean => {
+    return PEOPLE.every(person => 
+      calendarData[person.name]?.[day]?.[time] === 'available'
+    );
+  };
+
   if (isLoading) {
     return (
       <TransitionWrapper delay={50} className={cn('mb-8', className)}>
@@ -71,30 +79,37 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
                   {time}
                 </div>
                 
-                {DAYS.map((day) => (
-                  <div
-                    key={`${day}-${time}`}
-                    className="merged-time-slot rounded-md h-10 m-1 flex items-center justify-center bg-gray-50"
-                  >
-                    <div className="grid grid-cols-2 gap-1">
-                      {PEOPLE.map((person) => {
-                        const status = calendarData[person.name]?.[day]?.[time];
-                        return (
-                          <div 
-                            key={person.initial}
-                            className={cn(
-                              "w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium",
-                              getStatusClass(status)
-                            )}
-                            title={`${person.name}: ${status || 'Non défini'}`}
-                          >
-                            {person.initial}
-                          </div>
-                        );
-                      })}
+                {DAYS.map((day) => {
+                  const allAvailable = areAllAvailable(day, time);
+                  
+                  return (
+                    <div
+                      key={`${day}-${time}`}
+                      className={cn(
+                        "merged-time-slot rounded-md h-10 m-1 flex items-center justify-center",
+                        allAvailable ? "bg-available/20" : "bg-gray-50"
+                      )}
+                    >
+                      <div className="grid grid-cols-2 gap-1">
+                        {PEOPLE.map((person) => {
+                          const status = calendarData[person.name]?.[day]?.[time];
+                          return (
+                            <div 
+                              key={person.initial}
+                              className={cn(
+                                "w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium",
+                                getStatusClass(status)
+                              )}
+                              title={`${person.name}: ${status || 'Non défini'}`}
+                            >
+                              {person.initial}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </React.Fragment>
             ))}
           </div>
