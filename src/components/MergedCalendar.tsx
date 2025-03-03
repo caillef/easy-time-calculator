@@ -19,20 +19,20 @@ const TIMES = [
 ];
 
 const PEOPLE = [
-  { name: 'Léo', initial: 'L' },
-  { name: 'Hervé', initial: 'H' },
-  { name: 'Benoit', initial: 'B' },
-  { name: 'Corentin', initial: 'C' }
+  { name: 'Léo', emoji: '🦤', color: '#FFB6C1' }, // Light Pink
+  { name: 'Hervé', emoji: '🚀', color: '#ADD8E6' }, // Light Blue
+  { name: 'Benoit', emoji: '💎', color: '#90EE90' }, // Light Green
+  { name: 'Corentin', emoji: '🥳', color: '#FFFFE0' }  // Light Yellow
 ];
 
-const getStatusClass = (status: SlotStatus | undefined) => {
+const getStatusClass = (status: SlotStatus | undefined, personColor: string) => {
   switch (status) {
     case 'available':
       return 'bg-available text-white';
     case 'unavailable':
       return 'bg-unavailable text-white';
     default:
-      return 'bg-neutral border border-gray-300';
+      return `bg-neutral border border-gray-300`;
   }
 };
 
@@ -94,6 +94,20 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
           </div>
         </div>
         
+        {/* Legend for emojis */}
+        <div className="flex flex-wrap gap-4 mb-4 justify-center">
+          {PEOPLE.map((person) => (
+            <div 
+              key={person.name} 
+              className="flex items-center gap-1.5"
+              style={{ color: person.color }}
+            >
+              <span className="text-lg">{person.emoji}</span>
+              <span className="text-sm font-medium">{person.name}</span>
+            </div>
+          ))}
+        </div>
+        
         <div className="overflow-x-auto">
           <div className="merged-calendar-grid min-w-[700px]">
             <div className="col-start-1"></div>
@@ -139,19 +153,25 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
                         allAvailable ? "bg-available/20" : "bg-gray-50"
                       )}
                     >
-                      <div className="grid grid-cols-2 gap-x-1.5 gap-y-1.5 p-1">
+                      <div className="flex items-center space-x-2 p-1">
                         {PEOPLE.map((person) => {
                           const status = calendarData[currentWeekId]?.[person.name]?.[day]?.[time];
                           return (
                             <div 
-                              key={person.initial}
+                              key={person.emoji}
                               className={cn(
-                                "w-4 h-4 rounded-full flex items-center justify-center text-xs font-medium",
-                                getStatusClass(status)
+                                "h-6 w-6 flex items-center justify-center rounded-full",
+                                getStatusClass(status, person.color)
                               )}
+                              style={{ 
+                                backgroundColor: status === 'available' ? '#4CAF50' : 
+                                               status === 'unavailable' ? '#FF5A5A' : 
+                                               person.color,
+                                opacity: status ? 1 : 0.6
+                              }}
                               title={`${person.name}: ${status || 'Non défini'}`}
                             >
-                              {person.initial}
+                              <span>{person.emoji}</span>
                             </div>
                           );
                         })}
