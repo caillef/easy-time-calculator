@@ -6,22 +6,16 @@ import TransitionWrapper from '@/components/TransitionWrapper';
 import { CalendarProvider } from '@/context/CalendarContext';
 import PersonSelector from '@/components/PersonSelector';
 import MergedCalendar from '@/components/MergedCalendar';
-import RefreshDiscordButton from '@/components/RefreshDiscordButton';
 
 const Index = () => {
   return (
     <CalendarProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-0">
-        <div className="w-full">
+        <div className="w-full max-w-[98%] mx-auto">
           <TransitionWrapper>
-            <div className="flex flex-col space-y-6 px-4 md:px-8">
+            <div className="flex flex-col space-y-6">
               <div className="flex flex-col space-y-4">
-                <div className="flex justify-between items-start">
-                  <Header className="flex-1" />
-                  <div className="pt-6">
-                    <RefreshDiscordButton />
-                  </div>
-                </div>
+                <Header />
                 <MergedCalendar />
                 <PersonSelector />
                 <Calendar />
