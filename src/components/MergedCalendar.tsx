@@ -73,8 +73,21 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
               </div>
             ))}
             
-            {TIMES.map((time) => (
+            {TIMES.map((time, index) => (
               <React.Fragment key={time}>
+                {/* Add separator before 18:00 */}
+                {time === '18:00' && (
+                  <React.Fragment>
+                    <div className="col-span-1 border-t border-gray-300 my-2"></div>
+                    {DAYS.map((day, dayIndex) => (
+                      <div 
+                        key={`separator-${day}`} 
+                        className="col-span-1 border-t border-gray-300 my-2"
+                      ></div>
+                    ))}
+                  </React.Fragment>
+                )}
+                
                 <div className="flex items-center justify-end pr-4 text-xs text-muted-foreground">
                   {time}
                 </div>
