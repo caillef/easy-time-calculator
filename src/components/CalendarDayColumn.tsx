@@ -28,7 +28,7 @@ const CalendarDayColumn: React.FC<CalendarDayColumnProps> = ({
         <div className="font-medium">{dayName}</div>
         <div className="text-sm text-gray-500">{formattedDate}</div>
       </div>
-      <div>
+      <div className="px-0">
         {Object.entries(dayAvailability || {}).map(([timeSlot, statuses], index, arr) => {
           // Only show time slots that have at least one person with any status
           const hasAnyPerson = Object.values(statuses).some(persons => persons.length > 0);
