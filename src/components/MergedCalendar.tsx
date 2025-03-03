@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
@@ -47,7 +46,6 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
     currentWeekId
   } = useCalendar();
 
-  // Helper function to check if all people are available
   const areAllAvailable = (day: string, time: string): boolean => {
     return PEOPLE.every(person => 
       calendarData[currentWeekId]?.[person.name]?.[day]?.[time] === 'available'
@@ -94,13 +92,11 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
           </div>
         </div>
         
-        {/* Legend for emojis */}
         <div className="flex flex-wrap gap-4 mb-4 justify-center">
           {PEOPLE.map((person) => (
             <div 
               key={person.name} 
               className="flex items-center gap-1.5"
-              style={{ color: person.color }}
             >
               <span className="text-lg">{person.emoji}</span>
               <span className="text-sm font-medium">{person.name}</span>
@@ -125,7 +121,6 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
             
             {TIMES.map((time, index) => (
               <React.Fragment key={time}>
-                {/* Add separator before 18:00 with consistent spacing */}
                 {time === '18:00' && (
                   <React.Fragment>
                     <div className="col-span-1 border-t border-gray-300 my-4"></div>
