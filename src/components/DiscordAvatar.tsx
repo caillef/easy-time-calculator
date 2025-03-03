@@ -37,8 +37,8 @@ const DiscordAvatar: React.FC<DiscordAvatarProps> = ({
   
   // Status style mappings with thicker borders and opacity adjustment for neutral
   const statusStyles = {
-    available: 'border-4 border-green-500 bg-green-100 text-green-800',
-    unavailable: 'border-4 border-red-500 bg-red-100 text-red-800',
+    available: 'border-5 border-green-500 bg-green-100 text-green-800',
+    unavailable: 'border-5 border-red-500 bg-red-100 text-red-800',
     neutral: 'border-2 border-gray-300 bg-gray-100 text-gray-800 opacity-30'
   };
   
