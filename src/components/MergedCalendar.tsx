@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
@@ -24,7 +25,7 @@ const PEOPLE = [
   { name: 'Corentin', emoji: '🥳', color: '#FFFFE0' }  // Light Yellow
 ];
 
-const getStatusClass = (status: SlotStatus | undefined, personColor: string) => {
+const getStatusClass = (status: SlotStatus | undefined) => {
   switch (status) {
     case 'available':
       return 'bg-available text-white';
@@ -156,13 +157,12 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
                               key={person.emoji}
                               className={cn(
                                 "h-6 w-6 flex items-center justify-center rounded-full",
-                                getStatusClass(status, person.color)
+                                getStatusClass(status)
                               )}
                               style={{ 
                                 backgroundColor: status === 'available' ? '#4CAF50' : 
                                                status === 'unavailable' ? '#FF5A5A' : 
-                                               person.color,
-                                opacity: status ? 1 : 0.6
+                                               '#F5F5F7',
                               }}
                               title={`${person.name}: ${status || 'Non défini'}`}
                             >
