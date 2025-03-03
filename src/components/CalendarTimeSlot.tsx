@@ -23,14 +23,14 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
   discordUsers 
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [spacing, setSpacing] = useState<number>(-3); // Default spacing
+  const [overlapAmount, setOverlapAmount] = useState<number>(10); // Default overlap amount
   
   // Check if all persons are available
   const allAvailable = statuses.available.length === persons.length;
 
-  // Adjust spacing based on container width
+  // Adjust overlap based on container width
   useEffect(() => {
-    const updateSpacing = () => {
+    const updateOverlap = () => {
       if (!containerRef.current) return;
       
       const containerWidth = containerRef.current.clientWidth;
@@ -40,31 +40,31 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
       // Determine available width
       const availableWidth = containerWidth - 20; // subtract padding
       
-      // Calculate max width needed for fully separated avatars
-      const maxWidthNeeded = avatarSize * totalAvatars;
+      // Calculate width needed with different overlap values
+      const fullWidth = totalAvatars * avatarSize;
       
-      // Adjust spacing based on available width
-      if (availableWidth >= maxWidthNeeded + 16) {
-        // If too much space: completely separated (avatar-size apart)
-        setSpacing(8); // positive spacing
-      } else if (availableWidth >= maxWidthNeeded - 16) {
-        // If enough space: slightly apart (half-avatar spacing)
-        setSpacing(4);
-      } else if (availableWidth >= maxWidthNeeded - 48) {
-        // If not enough space: slight overlap
-        setSpacing(-8);
+      // Adjust overlap based on available width
+      if (availableWidth >= fullWidth) {
+        // No overlap needed if there's enough space
+        setOverlapAmount(0);
+      } else if (availableWidth >= fullWidth - (totalAvatars - 1) * 10) {
+        // Small overlap
+        setOverlapAmount(10);
+      } else if (availableWidth >= fullWidth - (totalAvatars - 1) * 15) {
+        // Medium overlap
+        setOverlapAmount(15);
       } else {
-        // If much not enough space: more overlap
-        setSpacing(-16);
+        // Large overlap
+        setOverlapAmount(20);
       }
     };
     
     // Initial calculation
-    updateSpacing();
+    updateOverlap();
     
     // Recalculate on window resize
-    window.addEventListener('resize', updateSpacing);
-    return () => window.removeEventListener('resize', updateSpacing);
+    window.addEventListener('resize', updateOverlap);
+    return () => window.removeEventListener('resize', updateOverlap);
   }, [persons.length]);
   
   return (
@@ -72,7 +72,7 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
       <div className="w-12 min-w-[48px] text-gray-500 text-center">{timeSlot}</div>
       
       <div ref={containerRef} className="flex-1 flex justify-center items-center px-2">
-        <div className="flex" style={{ gap: `${spacing}px` }}>
+        <div className="flex">
           {persons.map((person, index) => {
             const discordUser = findDiscordUser(person, discordUsers);
             let status: SlotStatus = 'neutral';
@@ -83,7 +83,7 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
               status = 'unavailable';
             }
             
-            // Apply z-index based on position (higher index = lower z-index)
+            // Apply z-index based on position (lower index = higher z-index)
             // This ensures the leftmost avatar is on top
             const zIndex = persons.length - index;
             
@@ -91,7 +91,10 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
               <div 
                 key={`${person}-${status}`} 
                 className="relative" 
-                style={{ zIndex }}
+                style={{ 
+                  zIndex,
+                  marginLeft: index > 0 ? `-${overlapAmount}px` : '0' 
+                }}
                 title={`${person} (${status === 'available' ? 'Disponible' : status === 'unavailable' ? 'Indisponible' : 'Pas encore décidé'})`}
               >
                 {discordUser ? (
