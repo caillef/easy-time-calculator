@@ -90,14 +90,14 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
                         allAvailable ? "bg-available/20" : "bg-gray-50"
                       )}
                     >
-                      <div className="grid grid-cols-2 gap-1">
+                      <div className="grid grid-cols-2 gap-x-1.5 gap-y-1.5 p-1">
                         {PEOPLE.map((person) => {
                           const status = calendarData[person.name]?.[day]?.[time];
                           return (
                             <div 
                               key={person.initial}
                               className={cn(
-                                "w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium",
+                                "w-4 h-4 rounded-full flex items-center justify-center text-xs font-medium",
                                 getStatusClass(status)
                               )}
                               title={`${person.name}: ${status || 'Non défini'}`}
