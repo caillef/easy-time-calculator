@@ -4,7 +4,7 @@ import { useCalendar } from '@/context/CalendarContext';
 import { Person } from '@/types/calendar';
 import TransitionWrapper from './TransitionWrapper';
 import { fetchDiscordUsers, type DiscordUser } from '@/services/discordService';
-import DiscordAvatar from './DiscordAvatar';
+import PersonSelectorAvatar from './PersonSelectorAvatar';
 
 const PersonSelector = () => {
   const { selectedPerson, setSelectedPerson } = useCalendar();
@@ -50,12 +50,11 @@ const PersonSelector = () => {
               >
                 {discordUser ? (
                   <div className="bg-white rounded-full overflow-hidden">
-                    <DiscordAvatar 
+                    <PersonSelectorAvatar 
                       name={person} 
                       userId={discordUser.discord_user_id} 
                       avatarId={discordUser.avatar} 
-                      size="sm" 
-                      status="neutral"
+                      size="sm"
                     />
                   </div>
                 ) : (
