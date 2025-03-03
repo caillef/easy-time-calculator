@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
 import TimeSlot, { SlotStatus } from './TimeSlot';
 import { useCalendar } from '@/context/CalendarContext';
+import { Loader2 } from 'lucide-react';
 
 interface CalendarProps {
   className?: string;
@@ -16,7 +17,7 @@ const TIMES = [
 ];
 
 const Calendar = ({ className }: CalendarProps) => {
-  const { selectedPerson, calendarData, setCalendarData } = useCalendar();
+  const { selectedPerson, calendarData, setCalendarData, isLoading } = useCalendar();
 
   const getSlotStatus = (day: string, time: string): SlotStatus => {
     if (!selectedPerson || !calendarData[selectedPerson]) return 'neutral';
@@ -58,6 +59,17 @@ const Calendar = ({ className }: CalendarProps) => {
       };
     });
   };
+
+  if (isLoading) {
+    return (
+      <TransitionWrapper delay={200} className={cn('flex justify-center items-center p-10', className)}>
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Chargement des données...</p>
+        </div>
+      </TransitionWrapper>
+    );
+  }
 
   return (
     <TransitionWrapper delay={200} className={cn('', className)}>

@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
 import { useCalendar } from '@/context/CalendarContext';
 import { SlotStatus } from './TimeSlot';
+import { Loader2 } from 'lucide-react';
 
 interface MergedCalendarProps {
   className?: string;
@@ -35,7 +36,20 @@ const getStatusClass = (status: SlotStatus | undefined) => {
 };
 
 const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
-  const { calendarData } = useCalendar();
+  const { calendarData, isLoading } = useCalendar();
+
+  if (isLoading) {
+    return (
+      <TransitionWrapper delay={50} className={cn('mb-8', className)}>
+        <div className="glass rounded-xl p-5 flex justify-center items-center" style={{ minHeight: '200px' }}>
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Chargement des données...</p>
+          </div>
+        </div>
+      </TransitionWrapper>
+    );
+  }
 
   return (
     <TransitionWrapper delay={50} className={cn('mb-8', className)}>
