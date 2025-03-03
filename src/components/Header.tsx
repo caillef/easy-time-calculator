@@ -15,7 +15,7 @@ const Header = ({ className }: HeaderProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <CalendarIcon className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-medium tracking-tight">Calendrier de Disponibilités</h1>
+            <h1 className="text-2xl font-medium tracking-tight">Goudale Calendar</h1>
           </div>
         </div>
         <p className="mt-4 text-muted-foreground max-w-3xl">

@@ -1,4 +1,5 @@
-# Welcome to your Lovable project
+
+# Goudale Calendar
 
 ## Project info
 
