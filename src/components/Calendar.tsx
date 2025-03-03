@@ -4,7 +4,9 @@ import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
 import TimeSlot, { SlotStatus } from './TimeSlot';
 import { useCalendar } from '@/context/CalendarContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface CalendarProps {
   className?: string;
@@ -17,19 +19,37 @@ const TIMES = [
 ];
 
 const Calendar = ({ className }: CalendarProps) => {
-  const { selectedPerson, calendarData, setCalendarData, isLoading } = useCalendar();
+  const { 
+    selectedPerson, 
+    calendarData, 
+    setCalendarData, 
+    isLoading, 
+    nextWeek, 
+    prevWeek, 
+    weekDates,
+    formatWeekRange,
+    currentWeekId
+  } = useCalendar();
 
   const getSlotStatus = (day: string, time: string): SlotStatus => {
-    if (!selectedPerson || !calendarData[selectedPerson]) return 'neutral';
+    if (!selectedPerson || !calendarData[currentWeekId]?.[selectedPerson]) return 'neutral';
     
-    return calendarData[selectedPerson]?.[day]?.[time] || 'neutral';
+    return calendarData[currentWeekId]?.[selectedPerson]?.[day]?.[time] || 'neutral';
   };
 
   const handleSlotClick = (day: string, time: string) => {
     if (!selectedPerson) return;
 
     setCalendarData(prev => {
-      const personData = prev[selectedPerson] || {};
+      // Make sure we have the week data structure
+      const weekData = prev[currentWeekId] || {
+        'Léo': {},
+        'Hervé': {},
+        'Benoit': {},
+        'Corentin': {},
+      };
+      
+      const personData = weekData[selectedPerson] || {};
       const dayData = personData[day] || {};
       
       // Get current status or default to neutral
@@ -52,9 +72,12 @@ const Calendar = ({ className }: CalendarProps) => {
       
       return {
         ...prev,
-        [selectedPerson]: {
-          ...personData,
-          [day]: updatedDayData
+        [currentWeekId]: {
+          ...weekData,
+          [selectedPerson]: {
+            ...personData,
+            [day]: updatedDayData
+          }
         }
       };
     });
@@ -75,15 +98,37 @@ const Calendar = ({ className }: CalendarProps) => {
     <TransitionWrapper delay={200} className={cn('', className)}>
       <div className="overflow-x-auto">
         <div className="calendar-grid min-w-[700px] glass rounded-xl p-4">
-          {/* Header row with day names */}
+          {/* Week navigation */}
+          <div className="col-span-full mb-4 flex items-center justify-between">
+            <button 
+              onClick={prevWeek}
+              className="rounded-full p-1.5 hover:bg-gray-200 transition-colors"
+              aria-label="Semaine précédente"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            
+            <h3 className="text-lg font-medium">{formatWeekRange()}</h3>
+            
+            <button 
+              onClick={nextWeek}
+              className="rounded-full p-1.5 hover:bg-gray-200 transition-colors"
+              aria-label="Semaine suivante"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+          
+          {/* Header row with day names and dates */}
           <div className="col-start-1"></div>
-          {DAYS.map((day) => (
+          {weekDates.map(({ day, date }) => (
             <TimeSlot 
               key={day} 
               day={day} 
               time="" 
               status="neutral" 
               isHeader={true} 
+              date={date}
             />
           ))}
           

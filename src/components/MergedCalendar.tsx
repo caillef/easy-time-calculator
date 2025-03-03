@@ -4,7 +4,9 @@ import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
 import { useCalendar } from '@/context/CalendarContext';
 import { SlotStatus } from './TimeSlot';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface MergedCalendarProps {
   className?: string;
@@ -35,12 +37,20 @@ const getStatusClass = (status: SlotStatus | undefined) => {
 };
 
 const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
-  const { calendarData, isLoading } = useCalendar();
+  const { 
+    calendarData, 
+    isLoading, 
+    nextWeek, 
+    prevWeek, 
+    weekDates,
+    formatWeekRange,
+    currentWeekId
+  } = useCalendar();
 
   // Helper function to check if all people are available
   const areAllAvailable = (day: string, time: string): boolean => {
     return PEOPLE.every(person => 
-      calendarData[person.name]?.[day]?.[time] === 'available'
+      calendarData[currentWeekId]?.[person.name]?.[day]?.[time] === 'available'
     );
   };
 
@@ -60,16 +70,42 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
   return (
     <TransitionWrapper delay={50} className={cn('mb-8', className)}>
       <div className="glass rounded-xl p-5">
-        <h3 className="text-lg font-medium mb-4">Vue Combinée</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium">Vue Combinée</h3>
+          
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={prevWeek}
+              className="rounded-full p-1.5 hover:bg-gray-200 transition-colors"
+              aria-label="Semaine précédente"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            
+            <span className="text-sm font-medium">{formatWeekRange()}</span>
+            
+            <button 
+              onClick={nextWeek}
+              className="rounded-full p-1.5 hover:bg-gray-200 transition-colors"
+              aria-label="Semaine suivante"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+        
         <div className="overflow-x-auto">
           <div className="merged-calendar-grid min-w-[700px]">
             <div className="col-start-1"></div>
-            {DAYS.map((day) => (
+            {weekDates.map(({ day, date }) => (
               <div 
                 key={day} 
-                className="flex items-center justify-center font-medium p-2 text-sm text-center"
+                className="flex flex-col items-center justify-center font-medium p-2 text-sm text-center"
               >
-                {day}
+                <span>{day}</span>
+                <span className="text-xs text-muted-foreground">
+                  {format(date, 'd MMM', { locale: fr })}
+                </span>
               </div>
             ))}
             
@@ -105,7 +141,7 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
                     >
                       <div className="grid grid-cols-2 gap-x-1.5 gap-y-1.5 p-1">
                         {PEOPLE.map((person) => {
-                          const status = calendarData[person.name]?.[day]?.[time];
+                          const status = calendarData[currentWeekId]?.[person.name]?.[day]?.[time];
                           return (
                             <div 
                               key={person.initial}

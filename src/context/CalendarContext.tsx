@@ -3,6 +3,8 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { SlotStatus } from '@/components/TimeSlot';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { addWeeks, subWeeks, startOfWeek, endOfWeek, format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 type Person = 'Léo' | 'Hervé' | 'Benoit' | 'Corentin' | '';
 
@@ -13,7 +15,9 @@ export type TimeSlotData = {
 };
 
 export type CalendarData = {
-  [person in Exclude<Person, ''>]?: TimeSlotData;
+  [weekId: string]: {
+    [person in Exclude<Person, ''>]?: TimeSlotData;
+  };
 };
 
 interface CalendarContextType {
@@ -22,6 +26,12 @@ interface CalendarContextType {
   calendarData: CalendarData;
   setCalendarData: React.Dispatch<React.SetStateAction<CalendarData>>;
   isLoading: boolean;
+  currentWeek: Date;
+  nextWeek: () => void;
+  prevWeek: () => void;
+  weekDates: { day: string; date: Date }[];
+  formatWeekRange: () => string;
+  currentWeekId: string;
 }
 
 const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
@@ -38,15 +48,80 @@ interface CalendarProviderProps {
   children: ReactNode;
 }
 
+const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+
 export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) => {
   const [selectedPerson, setSelectedPerson] = useState<Person>('');
-  const [calendarData, setCalendarData] = useState<CalendarData>({
-    'Léo': {},
-    'Hervé': {},
-    'Benoit': {},
-    'Corentin': {},
-  });
+  const [calendarData, setCalendarData] = useState<CalendarData>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
+
+  // Function to get week ID in YYYY-WW format
+  const getWeekId = (date: Date) => {
+    // Get week number and year
+    const year = format(date, 'yyyy', { locale: fr });
+    const week = format(date, 'ww', { locale: fr });
+    return `${year}-${week}`;
+  };
+
+  const currentWeekId = getWeekId(currentWeek);
+
+  // Calculate dates for each day of the current week
+  const getWeekDates = (baseDate: Date) => {
+    const start = startOfWeek(baseDate, { weekStartsOn: 1 }); // Week starts on Monday (1)
+    
+    return DAYS.map((day, index) => {
+      const date = new Date(start);
+      date.setDate(date.getDate() + index);
+      return { day, date };
+    });
+  };
+
+  const weekDates = getWeekDates(currentWeek);
+
+  // Navigate to next/previous weeks
+  const nextWeek = () => {
+    setCurrentWeek(prevDate => {
+      const newDate = addWeeks(prevDate, 1);
+      return newDate;
+    });
+  };
+
+  const prevWeek = () => {
+    setCurrentWeek(prevDate => {
+      const newDate = subWeeks(prevDate, 1);
+      return newDate;
+    });
+  };
+
+  // Format the week range for display
+  const formatWeekRange = () => {
+    const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
+    
+    // If same month, show "1-7 January 2024"
+    if (format(weekStart, 'MMMM', { locale: fr }) === format(weekEnd, 'MMMM', { locale: fr })) {
+      return `${format(weekStart, 'd', { locale: fr })}-${format(weekEnd, 'd MMMM yyyy', { locale: fr })}`;
+    }
+    
+    // If different months, show "28 January - 3 February 2024"
+    return `${format(weekStart, 'd MMMM', { locale: fr })} - ${format(weekEnd, 'd MMMM yyyy', { locale: fr })}`;
+  };
+
+  // Initialize calendar data structure if needed
+  useEffect(() => {
+    if (!calendarData[currentWeekId]) {
+      setCalendarData(prev => ({
+        ...prev,
+        [currentWeekId]: {
+          'Léo': {},
+          'Hervé': {},
+          'Benoit': {},
+          'Corentin': {},
+        }
+      }));
+    }
+  }, [currentWeekId, calendarData]);
 
   // Fetch initial data from Supabase
   useEffect(() => {
@@ -62,23 +137,34 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
         }
 
         // Transform the data from the database into our app's format
-        const transformedData: CalendarData = {
-          'Léo': {},
-          'Hervé': {},
-          'Benoit': {},
-          'Corentin': {},
-        };
+        const transformedData: CalendarData = {};
 
         data.forEach(entry => {
-          const { person, day, time_slot, status } = entry;
-          if (!transformedData[person as Person]) {
-            transformedData[person as Person] = {};
+          const { person, day, time_slot, status, week_id } = entry;
+          
+          // Initialize nested objects if they don't exist
+          if (!transformedData[week_id]) {
+            transformedData[week_id] = {};
           }
-          if (!transformedData[person as Person]![day]) {
-            transformedData[person as Person]![day] = {};
+          if (!transformedData[week_id][person as Person]) {
+            transformedData[week_id][person as Person] = {};
           }
-          transformedData[person as Person]![day][time_slot] = status as SlotStatus;
+          if (!transformedData[week_id][person as Person]![day]) {
+            transformedData[week_id][person as Person]![day] = {};
+          }
+          
+          transformedData[week_id][person as Person]![day][time_slot] = status as SlotStatus;
         });
+
+        // Make sure current week exists in data structure
+        if (!transformedData[currentWeekId]) {
+          transformedData[currentWeekId] = {
+            'Léo': {},
+            'Hervé': {},
+            'Benoit': {},
+            'Corentin': {},
+          };
+        }
 
         setCalendarData(transformedData);
       } catch (error) {
@@ -97,13 +183,13 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
   }, []);
 
   // Update Supabase when calendarData changes
-  const updateDatabaseEntry = async (person: Person, day: string, timeSlot: string, status: SlotStatus) => {
+  const updateDatabaseEntry = async (weekId: string, person: Person, day: string, timeSlot: string, status: SlotStatus) => {
     try {
       const { error } = await supabase
         .from('calendar_data')
         .upsert(
-          { person, day, time_slot: timeSlot, status },
-          { onConflict: 'person,day,time_slot' }
+          { week_id: weekId, person, day, time_slot: timeSlot, status },
+          { onConflict: 'week_id,person,day,time_slot' }
         );
       
       if (error) throw error;
@@ -122,23 +208,31 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
       selectedPerson, 
       setSelectedPerson, 
       calendarData, 
+      currentWeek,
+      nextWeek,
+      prevWeek,
+      weekDates,
+      formatWeekRange,
+      currentWeekId,
       setCalendarData: (newData) => {
         // If it's a function, execute it to get the new state
         if (typeof newData === 'function') {
           const updatedData = newData(calendarData);
           
           // Find the differences and update Supabase
-          Object.entries(updatedData).forEach(([person, personData]) => {
-            if (person === '') return; // Skip empty person
-            
-            Object.entries(personData).forEach(([day, dayData]) => {
-              Object.entries(dayData).forEach(([timeSlot, status]) => {
-                const oldStatus = calendarData[person as Person]?.[day]?.[timeSlot];
-                
-                if (oldStatus !== status) {
-                  // Only update if the status has changed
-                  updateDatabaseEntry(person as Person, day, timeSlot, status);
-                }
+          Object.entries(updatedData).forEach(([weekId, weekData]) => {
+            Object.entries(weekData).forEach(([person, personData]) => {
+              if (person === '') return; // Skip empty person
+              
+              Object.entries(personData).forEach(([day, dayData]) => {
+                Object.entries(dayData).forEach(([timeSlot, status]) => {
+                  const oldStatus = calendarData[weekId]?.[person as Person]?.[day]?.[timeSlot];
+                  
+                  if (oldStatus !== status) {
+                    // Only update if the status has changed
+                    updateDatabaseEntry(weekId, person as Person, day, timeSlot, status);
+                  }
+                });
               });
             });
           });

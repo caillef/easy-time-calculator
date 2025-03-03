@@ -2,6 +2,8 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Check, X, Minus } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 export type SlotStatus = 'unavailable' | 'available' | 'neutral';
 
@@ -13,6 +15,7 @@ interface TimeSlotProps {
   isTimeLabel?: boolean;
   disabled?: boolean;
   onClick?: () => void;
+  date?: Date;
 }
 
 const TimeSlot = ({ 
@@ -22,7 +25,8 @@ const TimeSlot = ({
   isHeader = false, 
   isTimeLabel = false,
   disabled = false,
-  onClick 
+  onClick,
+  date
 }: TimeSlotProps) => {
   
   const statusClasses = {
@@ -39,8 +43,13 @@ const TimeSlot = ({
 
   if (isHeader) {
     return (
-      <div className="flex items-center justify-center font-medium p-2 text-sm text-center">
-        {day}
+      <div className="flex flex-col items-center justify-center font-medium p-2 text-sm text-center">
+        <span>{day}</span>
+        {date && (
+          <span className="text-xs text-muted-foreground">
+            {format(date, 'd MMM', { locale: fr })}
+          </span>
+        )}
       </div>
     );
   }
