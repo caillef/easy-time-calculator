@@ -35,11 +35,11 @@ const CalendarDayColumn: React.FC<CalendarDayColumnProps> = ({
           if (!hasAnyPerson) return null;
           
           // Check if we need a separator (only between 17:00 and 18:00)
-          const needsSeparator = timeSlot === '17:00';
+          const showSeparator = timeSlot === '17:00';
           
           return (
             <React.Fragment key={`${day}-${timeSlot}`}>
-              {needsSeparator && <div className="border-t border-gray-200 my-3"></div>}
+              {showSeparator && <div className="border-t border-gray-200 my-3"></div>}
               <CalendarTimeSlot
                 timeSlot={timeSlot}
                 persons={persons}
