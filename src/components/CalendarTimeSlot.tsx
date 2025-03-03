@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Person } from '@/types/calendar';
 import { SlotStatus } from './TimeSlot';
-import DiscordAvatar from './DiscordAvatar';
+import { Person } from '@/types/calendar';
 import { DiscordUser } from '@/services/discordService';
+import DiscordAvatar from './DiscordAvatar';
 
 interface CalendarTimeSlotProps {
   timeSlot: string;
@@ -22,8 +22,11 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
   statuses, 
   discordUsers 
 }) => {
+  // Check if all persons are available
+  const allAvailable = statuses.available.length === persons.length;
+  
   return (
-    <div className="flex items-center text-sm p-1 border-b">
+    <div className={`flex items-center text-sm p-1 border-b ${allAvailable ? 'bg-green-100 rounded-md' : ''}`}>
       <span className="w-10 text-gray-500">{timeSlot}</span>
       
       <div className="ml-2 flex flex-row items-center space-x-1">
