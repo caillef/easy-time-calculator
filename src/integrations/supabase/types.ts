@@ -39,6 +39,33 @@ export type Database = {
         }
         Relationships: []
       }
+      discord_users: {
+        Row: {
+          avatar: string | null
+          discord_user_id: string
+          id: string
+          name: string
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar?: string | null
+          discord_user_id: string
+          id: string
+          name: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar?: string | null
+          discord_user_id?: string
+          id?: string
+          name?: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -6,6 +6,7 @@ import TransitionWrapper from '@/components/TransitionWrapper';
 import { CalendarProvider } from '@/context/CalendarContext';
 import PersonSelector from '@/components/PersonSelector';
 import MergedCalendar from '@/components/MergedCalendar';
+import RefreshDiscordButton from '@/components/RefreshDiscordButton';
 
 const Index = () => {
   return (
@@ -14,7 +15,10 @@ const Index = () => {
         <div className="max-w-6xl mx-auto">
           <TransitionWrapper>
             <div className="flex flex-col space-y-6">
-              <Header />
+              <div className="flex justify-between items-center">
+                <Header />
+                <RefreshDiscordButton />
+              </div>
               <MergedCalendar />
               <PersonSelector />
               <Calendar />

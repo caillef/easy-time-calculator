@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
 import { useCalendar } from '@/context/CalendarContext';
@@ -8,6 +8,7 @@ import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { DAYS } from '@/utils/calendarUtils';
+import { DiscordUser, fetchDiscordUsers, getDiscordAvatarUrl } from '@/services/discordService';
 
 interface MergedCalendarProps {
   className?: string;
@@ -16,13 +17,6 @@ interface MergedCalendarProps {
 const TIMES = [
   '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', 
   '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
-];
-
-const PEOPLE = [
-  { name: 'Léo', initial: 'L', color: '#FFB6C1' }, // Light Pink
-  { name: 'Hervé', initial: 'H', color: '#ADD8E6' }, // Light Blue
-  { name: 'Benoit', initial: 'B', color: '#90EE90' }, // Light Green
-  { name: 'Corentin', initial: 'C', color: '#FFFFE0' }  // Light Yellow
 ];
 
 const getStatusClass = (status: SlotStatus | undefined) => {
@@ -39,19 +33,35 @@ const getStatusClass = (status: SlotStatus | undefined) => {
 const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
   const { 
     calendarData, 
-    isLoading, 
+    isLoading: isCalendarLoading, 
     nextWeek, 
     prevWeek, 
     weekDates,
     formatWeekRange,
     currentWeekId
   } = useCalendar();
+  
+  const [discordUsers, setDiscordUsers] = useState<DiscordUser[]>([]);
+  const [isDiscordLoading, setIsDiscordLoading] = useState(true);
+  
+  useEffect(() => {
+    const loadDiscordUsers = async () => {
+      setIsDiscordLoading(true);
+      const users = await fetchDiscordUsers();
+      setDiscordUsers(users);
+      setIsDiscordLoading(false);
+    };
+    
+    loadDiscordUsers();
+  }, []);
 
   const areAllAvailable = (day: string, time: string): boolean => {
-    return PEOPLE.every(person => 
-      calendarData[currentWeekId]?.[person.name]?.[day]?.[time] === 'available'
+    return discordUsers.every(user => 
+      calendarData[currentWeekId]?.[user.name]?.[day]?.[time] === 'available'
     );
   };
+  
+  const isLoading = isCalendarLoading || isDiscordLoading;
 
   if (isLoading) {
     return (
@@ -94,12 +104,24 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
         </div>
         
         <div className="flex flex-wrap gap-4 mb-4 justify-center">
-          {PEOPLE.map((person) => (
+          {discordUsers.map((user) => (
             <div 
-              key={person.name} 
+              key={user.id} 
               className="flex items-center gap-1.5"
             >
-              <span className="text-sm font-medium">{person.name} ({person.initial})</span>
+              <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                <img 
+                  src={getDiscordAvatarUrl(user.discord_user_id, user.avatar)}
+                  alt={user.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to initial if image fails to load
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement!.innerText = user.name.charAt(0);
+                  }}
+                />
+              </div>
+              <span className="text-sm font-medium">{user.name}</span>
             </div>
           ))}
         </div>
@@ -149,13 +171,13 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
                       )}
                     >
                       <div className="flex items-center space-x-2 p-1">
-                        {PEOPLE.map((person) => {
-                          const status = calendarData[currentWeekId]?.[person.name]?.[day]?.[time];
+                        {discordUsers.map((user) => {
+                          const status = calendarData[currentWeekId]?.[user.name]?.[day]?.[time];
                           return (
                             <div 
-                              key={person.initial}
+                              key={user.id}
                               className={cn(
-                                "h-6 w-6 flex items-center justify-center rounded-full font-medium text-xs",
+                                "h-6 w-6 flex items-center justify-center rounded-full font-medium text-xs overflow-hidden",
                                 getStatusClass(status)
                               )}
                               style={{ 
@@ -163,9 +185,21 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
                                                status === 'unavailable' ? '#FF5A5A' : 
                                                '#F5F5F7',
                               }}
-                              title={`${person.name}: ${status || 'Non défini'}`}
+                              title={`${user.name}: ${status || 'Non défini'}`}
                             >
-                              {person.initial}
+                              {status && (
+                                <img 
+                                  src={getDiscordAvatarUrl(user.discord_user_id, user.avatar)}
+                                  alt={user.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    // Fallback to initial if image fails to load
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.parentElement!.innerText = user.name.charAt(0);
+                                  }}
+                                />
+                              )}
+                              {!status && user.name.charAt(0)}
                             </div>
                           );
                         })}
