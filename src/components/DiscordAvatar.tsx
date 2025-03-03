@@ -35,18 +35,24 @@ const DiscordAvatar: React.FC<DiscordAvatarProps> = ({
     lg: 'h-12 w-12'
   };
   
+  // Determine if we should apply transparency for neutral status
+  // Only apply transparency if it's neutral status and NOT in the person selector buttons
+  const shouldBeTransparent = status === 'neutral';
+  
   // Status style mappings with thicker borders and opacity adjustment for neutral
   const statusStyles = {
     available: 'border-5 border-green-500 bg-green-100 text-green-800',
     unavailable: 'border-5 border-red-500 bg-red-100 text-red-800',
-    neutral: 'border-2 border-gray-300 bg-white text-gray-800'
+    neutral: `border-2 border-gray-300 bg-white text-gray-800 ${shouldBeTransparent ? 'opacity-30' : ''}`
   };
   
   return (
     <div className="rounded-full bg-white">
       <Avatar className={`${sizeClasses[size]} ${statusStyles[status]}`}>
         <AvatarImage src={avatarUrl} alt={name} className="object-cover bg-white" />
-        <AvatarFallback className="bg-white">{initials}</AvatarFallback>
+        <AvatarFallback className={`bg-white ${shouldBeTransparent ? 'opacity-30' : ''}`}>
+          {initials}
+        </AvatarFallback>
       </Avatar>
     </div>
   );
