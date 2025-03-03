@@ -11,6 +11,7 @@ interface TimeSlotProps {
   status: SlotStatus;
   isHeader?: boolean;
   isTimeLabel?: boolean;
+  disabled?: boolean;
   onClick?: () => void;
 }
 
@@ -20,6 +21,7 @@ const TimeSlot = ({
   status, 
   isHeader = false, 
   isTimeLabel = false,
+  disabled = false,
   onClick 
 }: TimeSlotProps) => {
   
@@ -54,9 +56,11 @@ const TimeSlot = ({
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       className={cn(
         'time-slot rounded-md h-10 m-1 flex items-center justify-center',
-        statusClasses[status]
+        statusClasses[status],
+        disabled && 'opacity-50 cursor-not-allowed'
       )}
     >
       {statusIcons[status]}

@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -88,14 +87,26 @@
     grid-template-rows: 50px;
     grid-auto-rows: minmax(40px, auto);
   }
+  
+  .merged-calendar-grid {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    grid-template-rows: 50px;
+    grid-auto-rows: minmax(40px, auto);
+  }
 
   .time-slot {
     @apply transition-all duration-300 ease-out;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .time-slot:hover {
+  .time-slot:hover:not(:disabled) {
     @apply transform scale-105 shadow-md;
+  }
+  
+  .merged-time-slot {
+    @apply transition-all duration-300 ease-out;
+    -webkit-tap-highlight-color: transparent;
   }
   
   .time-slot-unavailable {

@@ -1,18 +1,13 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
 import TimeSlot, { SlotStatus } from './TimeSlot';
+import { useCalendar } from '@/context/CalendarContext';
 
 interface CalendarProps {
   className?: string;
 }
-
-type TimeSlotData = {
-  [day: string]: {
-    [time: string]: SlotStatus;
-  };
-};
 
 const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 const TIMES = [
@@ -21,25 +16,26 @@ const TIMES = [
 ];
 
 const Calendar = ({ className }: CalendarProps) => {
-  const [slots, setSlots] = useState<TimeSlotData>(() => {
-    const initialSlots: TimeSlotData = {};
+  const { selectedPerson, calendarData, setCalendarData } = useCalendar();
+
+  const getSlotStatus = (day: string, time: string): SlotStatus => {
+    if (!selectedPerson || !calendarData[selectedPerson]) return 'neutral';
     
-    DAYS.forEach(day => {
-      initialSlots[day] = {};
-      TIMES.forEach(time => {
-        initialSlots[day][time] = 'neutral';
-      });
-    });
-    
-    return initialSlots;
-  });
+    return calendarData[selectedPerson]?.[day]?.[time] || 'neutral';
+  };
 
   const handleSlotClick = (day: string, time: string) => {
-    setSlots(prev => {
-      const currentStatus = prev[day][time];
-      let newStatus: SlotStatus;
+    if (!selectedPerson) return;
+
+    setCalendarData(prev => {
+      const personData = prev[selectedPerson] || {};
+      const dayData = personData[day] || {};
+      
+      // Get current status or default to neutral
+      const currentStatus = dayData[time] || 'neutral';
       
       // Cycle through statuses: neutral -> available -> unavailable -> neutral
+      let newStatus: SlotStatus;
       if (currentStatus === 'neutral') {
         newStatus = 'available';
       } else if (currentStatus === 'available') {
@@ -48,11 +44,16 @@ const Calendar = ({ className }: CalendarProps) => {
         newStatus = 'neutral';
       }
       
+      const updatedDayData = {
+        ...dayData,
+        [time]: newStatus
+      };
+      
       return {
         ...prev,
-        [day]: {
-          ...prev[day],
-          [time]: newStatus
+        [selectedPerson]: {
+          ...personData,
+          [day]: updatedDayData
         }
       };
     });
@@ -64,7 +65,7 @@ const Calendar = ({ className }: CalendarProps) => {
         <div className="calendar-grid min-w-[700px] glass rounded-xl p-4">
           {/* Header row with day names */}
           <div className="col-start-1"></div>
-          {DAYS.map((day, index) => (
+          {DAYS.map((day) => (
             <TimeSlot 
               key={day} 
               day={day} 
@@ -75,7 +76,7 @@ const Calendar = ({ className }: CalendarProps) => {
           ))}
           
           {/* Time slots */}
-          {TIMES.map((time, timeIndex) => (
+          {TIMES.map((time) => (
             <React.Fragment key={time}>
               <TimeSlot
                 day=""
@@ -84,13 +85,14 @@ const Calendar = ({ className }: CalendarProps) => {
                 isTimeLabel={true}
               />
               
-              {DAYS.map((day, dayIndex) => (
+              {DAYS.map((day) => (
                 <TimeSlot
                   key={`${day}-${time}`}
                   day={day}
                   time={time}
-                  status={slots[day][time]}
+                  status={getSlotStatus(day, time)}
                   onClick={() => handleSlotClick(day, time)}
+                  disabled={!selectedPerson}
                 />
               ))}
             </React.Fragment>
