@@ -43,10 +43,12 @@ const DiscordAvatar: React.FC<DiscordAvatarProps> = ({
   };
   
   return (
-    <Avatar className={`${sizeClasses[size]} ${statusStyles[status]}`}>
-      <AvatarImage src={avatarUrl} alt={name} className="object-cover" />
-      <AvatarFallback className={status === 'neutral' ? 'opacity-30' : ''}>{initials}</AvatarFallback>
-    </Avatar>
+    <div className="rounded-full bg-white">
+      <Avatar className={`${sizeClasses[size]} ${statusStyles[status]}`}>
+        <AvatarImage src={avatarUrl} alt={name} className="object-cover bg-white" />
+        <AvatarFallback className={`bg-white ${status === 'neutral' ? 'opacity-30' : ''}`}>{initials}</AvatarFallback>
+      </Avatar>
+    </div>
   );
 };
 

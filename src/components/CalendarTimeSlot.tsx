@@ -107,7 +107,7 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
                   />
                 ) : (
                   <div className={`
-                    w-8 h-8 rounded-full flex items-center justify-center text-xs
+                    w-8 h-8 rounded-full flex items-center justify-center text-xs bg-white
                     ${status === 'available' ? 'border-4 border-green-500 bg-green-100 text-green-800' : 
                       status === 'unavailable' ? 'border-4 border-red-500 bg-red-100 text-red-800' : 
                       'border-2 border-gray-300 bg-gray-100 text-gray-800 opacity-30'}
