@@ -39,14 +39,14 @@ const DiscordAvatar: React.FC<DiscordAvatarProps> = ({
   const statusStyles = {
     available: 'border-5 border-green-500 bg-green-100 text-green-800',
     unavailable: 'border-5 border-red-500 bg-red-100 text-red-800',
-    neutral: 'border-2 border-gray-300 bg-gray-100 text-gray-800 opacity-30'
+    neutral: 'border-2 border-gray-300 bg-white text-gray-800'
   };
   
   return (
     <div className="rounded-full bg-white">
       <Avatar className={`${sizeClasses[size]} ${statusStyles[status]}`}>
         <AvatarImage src={avatarUrl} alt={name} className="object-cover bg-white" />
-        <AvatarFallback className={`bg-white ${status === 'neutral' ? 'opacity-30' : ''}`}>{initials}</AvatarFallback>
+        <AvatarFallback className="bg-white">{initials}</AvatarFallback>
       </Avatar>
     </div>
   );

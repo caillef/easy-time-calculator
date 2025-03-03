@@ -49,12 +49,15 @@ const PersonSelector = () => {
                 }`}
               >
                 {discordUser ? (
-                  <DiscordAvatar 
-                    name={person} 
-                    userId={discordUser.discord_user_id} 
-                    avatarId={discordUser.avatar} 
-                    size="sm" 
-                  />
+                  <div className="bg-white rounded-full overflow-hidden">
+                    <DiscordAvatar 
+                      name={person} 
+                      userId={discordUser.discord_user_id} 
+                      avatarId={discordUser.avatar} 
+                      size="sm" 
+                      status="neutral"
+                    />
+                  </div>
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700">
                     {person.charAt(0)}
