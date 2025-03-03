@@ -15,47 +15,27 @@ const TIMES = [
   '16:00', '17:00', '18:00', '19:00', '20:00'
 ];
 
-type SlotSummary = {
-  available: number;
-  unavailable: number;
-  neutral: number;
-  total: number;
+const PEOPLE = [
+  { name: 'Léo', initial: 'L' },
+  { name: 'Hervé', initial: 'H' },
+  { name: 'Benoit', initial: 'B' },
+  { name: 'Corentin', initial: 'C' }
+];
+
+// Helper function to get status class
+const getStatusClass = (status: SlotStatus | undefined) => {
+  switch (status) {
+    case 'available':
+      return 'bg-available text-white';
+    case 'unavailable':
+      return 'bg-unavailable text-white';
+    default:
+      return 'bg-neutral border border-gray-300';
+  }
 };
 
 const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
   const { calendarData } = useCalendar();
-
-  const getSummaryForSlot = (day: string, time: string): SlotSummary => {
-    const summary = {
-      available: 0,
-      unavailable: 0,
-      neutral: 0,
-      total: 0
-    };
-
-    Object.values(calendarData).forEach(personData => {
-      if (personData && personData[day] && personData[day][time]) {
-        const status = personData[day][time];
-        summary[status]++;
-        summary.total++;
-      }
-    });
-
-    return summary;
-  };
-
-  const getSlotColor = (summary: SlotSummary) => {
-    // If everyone is available
-    if (summary.available === summary.total && summary.total > 0) {
-      return 'bg-available/80';
-    }
-    // If everyone is unavailable
-    if (summary.unavailable === summary.total && summary.total > 0) {
-      return 'bg-unavailable/80';
-    }
-    // Mixed or neutral cases
-    return 'bg-neutral';
-  };
 
   return (
     <TransitionWrapper delay={50} className={cn('mb-8', className)}>
@@ -81,37 +61,30 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
                   {time}
                 </div>
                 
-                {DAYS.map((day) => {
-                  const summary = getSummaryForSlot(day, time);
-                  const baseColor = getSlotColor(summary);
-                  
-                  return (
-                    <div
-                      key={`${day}-${time}`}
-                      className={cn(
-                        'merged-time-slot rounded-md h-10 m-1 flex items-center justify-center',
-                        baseColor
-                      )}
-                    >
-                      {summary.total > 0 && (
-                        <div className="flex gap-1">
-                          {summary.available > 0 && (
-                            <span className="h-3 w-3 bg-available rounded-full" 
-                                  title={`${summary.available} personnes disponibles`} />
-                          )}
-                          {summary.unavailable > 0 && (
-                            <span className="h-3 w-3 bg-unavailable rounded-full" 
-                                  title={`${summary.unavailable} personnes non disponibles`} />
-                          )}
-                          {summary.neutral > 0 && (
-                            <span className="h-3 w-3 bg-neutral border border-gray-300 rounded-full" 
-                                  title={`${summary.neutral} personnes peuvent se libérer`} />
-                          )}
-                        </div>
-                      )}
+                {DAYS.map((day) => (
+                  <div
+                    key={`${day}-${time}`}
+                    className="merged-time-slot rounded-md h-10 m-1 flex items-center justify-center bg-gray-50"
+                  >
+                    <div className="grid grid-cols-2 gap-1">
+                      {PEOPLE.map((person) => {
+                        const status = calendarData[person.name]?.[day]?.[time];
+                        return (
+                          <div 
+                            key={person.initial}
+                            className={cn(
+                              "w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium",
+                              getStatusClass(status)
+                            )}
+                            title={`${person.name}: ${status || 'Non défini'}`}
+                          >
+                            {person.initial}
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </React.Fragment>
             ))}
           </div>
