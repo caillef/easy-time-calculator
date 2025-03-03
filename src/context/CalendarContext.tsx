@@ -50,11 +50,28 @@ interface CalendarProviderProps {
 
 const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 
+// LocalStorage key for selected person
+const SELECTED_PERSON_KEY = 'goudale-calendar-selected-person';
+
 export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) => {
-  const [selectedPerson, setSelectedPerson] = useState<Person>('');
+  // Initialize selectedPerson from localStorage if available
+  const [selectedPerson, setSelectedPerson] = useState<Person>(() => {
+    const storedPerson = localStorage.getItem(SELECTED_PERSON_KEY);
+    return (storedPerson as Person) || '';
+  });
+  
   const [calendarData, setCalendarData] = useState<CalendarData>({});
   const [isLoading, setIsLoading] = useState(true);
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
+
+  // Save selectedPerson to localStorage whenever it changes
+  useEffect(() => {
+    if (selectedPerson) {
+      localStorage.setItem(SELECTED_PERSON_KEY, selectedPerson);
+    } else {
+      localStorage.removeItem(SELECTED_PERSON_KEY);
+    }
+  }, [selectedPerson]);
 
   // Function to get week ID in YYYY-WW format
   const getWeekId = (date: Date) => {
