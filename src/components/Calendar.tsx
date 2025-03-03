@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
@@ -132,19 +133,7 @@ const Calendar = ({ className }: CalendarProps) => {
           {/* Time slots */}
           {TIMES.map((time, index) => (
             <React.Fragment key={time}>
-              {/* Add separator before 18:00 with consistent spacing */}
-              {time === '18:00' && (
-                <React.Fragment>
-                  <div className="col-span-1 border-t border-gray-300 my-4"></div>
-                  {DAYS.map((day, dayIndex) => (
-                    <div 
-                      key={`separator-${day}`} 
-                      className="col-span-1 border-t border-gray-300 my-4"
-                    ></div>
-                  ))}
-                </React.Fragment>
-              )}
-              
+              {/* Time slot row */}
               <TimeSlot
                 day=""
                 time={time}
@@ -162,6 +151,19 @@ const Calendar = ({ className }: CalendarProps) => {
                   disabled={!selectedPerson}
                 />
               ))}
+              
+              {/* Add separator after 17:00 and before 18:00 */}
+              {time === '17:00' && (
+                <React.Fragment>
+                  <div className="col-span-1 border-t border-gray-300 my-4"></div>
+                  {DAYS.map((day, dayIndex) => (
+                    <div 
+                      key={`separator-${day}`} 
+                      className="col-span-1 border-t border-gray-300 my-4"
+                    ></div>
+                  ))}
+                </React.Fragment>
+              )}
             </React.Fragment>
           ))}
         </div>

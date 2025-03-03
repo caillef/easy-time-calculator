@@ -34,18 +34,20 @@ const CalendarDayColumn: React.FC<CalendarDayColumnProps> = ({
           const hasAnyPerson = Object.values(statuses).some(persons => persons.length > 0);
           if (!hasAnyPerson) return null;
           
-          // Check if we need a separator (only between 17:00 and 18:00)
+          // Check if we need a separator (between 17:00 and 18:00)
           const showSeparator = timeSlot === '17:00';
+          const nextTimeSlot = arr[index + 1]?.[0];
+          const isLastSlotBefore18 = showSeparator && nextTimeSlot === '18:00';
           
           return (
             <React.Fragment key={`${day}-${timeSlot}`}>
-              {showSeparator && <div className="border-t border-gray-200 my-3"></div>}
               <CalendarTimeSlot
                 timeSlot={timeSlot}
                 persons={persons}
                 statuses={statuses}
                 discordUsers={discordUsers}
               />
+              {isLastSlotBefore18 && <div className="border-t border-gray-200 my-3"></div>}
             </React.Fragment>
           );
         })}
