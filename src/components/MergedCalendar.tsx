@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useCalendar } from '@/context/CalendarContext';
 import { SlotStatus } from './TimeSlot';
@@ -44,6 +45,9 @@ const MergedCalendar = () => {
           const status = calendarData[currentWeekId]?.[person]?.[day]?.[timeSlot];
           if (status) {
             result[day][timeSlot][status].push(person);
+          } else {
+            // If no status is set, consider it as neutral
+            result[day][timeSlot]['neutral'].push(person);
           }
         });
       });
@@ -59,6 +63,13 @@ const MergedCalendar = () => {
   if (Object.keys(mergedAvailability).length === 0) {
     return null;
   }
+
+  // Style maps for different status types
+  const statusStyles = {
+    available: "border-green-300 bg-green-100",
+    unavailable: "border-red-300 bg-red-100",
+    neutral: "border-gray-300 bg-gray-100"
+  };
 
   return (
     <TransitionWrapper>
@@ -77,36 +88,103 @@ const MergedCalendar = () => {
                 </div>
                 <div className="space-y-2">
                   {Object.entries(mergedAvailability[day] || {}).map(([timeSlot, statuses]) => {
-                    if (statuses.available.length === 0) return null;
+                    // Only show time slots that have at least one person with any status
+                    const hasAnyPerson = Object.values(statuses).some(persons => persons.length > 0);
+                    if (!hasAnyPerson) return null;
                     
                     return (
                       <div key={`${day}-${timeSlot}`} className="flex items-center text-sm p-1 border-b">
                         <span className="w-10 text-gray-500">{timeSlot}</span>
-                        <div className="ml-2 flex flex-wrap gap-1">
-                          {statuses.available.map(person => {
-                            const discordUser = findDiscordUser(person);
-                            return (
-                              <div 
-                                key={person} 
-                                className="relative"
-                                title={person}
-                              >
-                                {discordUser ? (
-                                  <DiscordAvatar 
-                                    name={person} 
-                                    userId={discordUser.discord_user_id} 
-                                    avatarId={discordUser.avatar} 
-                                    size="sm" 
-                                  />
-                                ) : (
-                                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-800 text-xs">
-                                    {person.charAt(0)}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
+                        
+                        {/* Show available people */}
+                        {statuses.available.length > 0 && (
+                          <div className="ml-2 flex flex-wrap gap-1">
+                            {statuses.available.map(person => {
+                              const discordUser = findDiscordUser(person);
+                              return (
+                                <div 
+                                  key={`available-${person}`} 
+                                  className="relative"
+                                  title={`${person} (Disponible)`}
+                                >
+                                  {discordUser ? (
+                                    <DiscordAvatar 
+                                      name={person} 
+                                      userId={discordUser.discord_user_id} 
+                                      avatarId={discordUser.avatar} 
+                                      size="sm" 
+                                      status="available"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded-full bg-green-100 border-2 border-green-300 flex items-center justify-center text-green-800 text-xs">
+                                      {person.charAt(0)}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        
+                        {/* Show unavailable people */}
+                        {statuses.unavailable.length > 0 && (
+                          <div className="ml-2 flex flex-wrap gap-1">
+                            {statuses.unavailable.map(person => {
+                              const discordUser = findDiscordUser(person);
+                              return (
+                                <div 
+                                  key={`unavailable-${person}`} 
+                                  className="relative"
+                                  title={`${person} (Indisponible)`}
+                                >
+                                  {discordUser ? (
+                                    <DiscordAvatar 
+                                      name={person} 
+                                      userId={discordUser.discord_user_id} 
+                                      avatarId={discordUser.avatar} 
+                                      size="sm" 
+                                      status="unavailable"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded-full bg-red-100 border-2 border-red-300 flex items-center justify-center text-red-800 text-xs">
+                                      {person.charAt(0)}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        
+                        {/* Show neutral people */}
+                        {statuses.neutral.length > 0 && (
+                          <div className="ml-2 flex flex-wrap gap-1">
+                            {statuses.neutral.map(person => {
+                              const discordUser = findDiscordUser(person);
+                              return (
+                                <div 
+                                  key={`neutral-${person}`} 
+                                  className="relative"
+                                  title={`${person} (Pas encore décidé)`}
+                                >
+                                  {discordUser ? (
+                                    <DiscordAvatar 
+                                      name={person} 
+                                      userId={discordUser.discord_user_id} 
+                                      avatarId={discordUser.avatar} 
+                                      size="sm" 
+                                      status="neutral"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded-full bg-gray-100 border-2 border-gray-300 flex items-center justify-center text-gray-800 text-xs">
+                                      {person.charAt(0)}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     );
                   })}

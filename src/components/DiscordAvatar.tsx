@@ -2,19 +2,22 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getDiscordAvatarUrl } from '@/services/discordService';
+import { SlotStatus } from './TimeSlot';
 
 interface DiscordAvatarProps {
   name: string;
   userId: string;
   avatarId: string | null;
   size?: 'sm' | 'md' | 'lg';
+  status?: SlotStatus;
 }
 
 const DiscordAvatar: React.FC<DiscordAvatarProps> = ({ 
   name, 
   userId, 
   avatarId,
-  size = 'md'
+  size = 'md',
+  status = 'neutral'
 }) => {
   const avatarUrl = getDiscordAvatarUrl(userId, avatarId);
   
@@ -32,10 +35,17 @@ const DiscordAvatar: React.FC<DiscordAvatarProps> = ({
     lg: 'h-12 w-12'
   };
   
+  // Status style mappings
+  const statusStyles = {
+    available: 'border-green-300 bg-green-100 text-green-800',
+    unavailable: 'border-red-300 bg-red-100 text-red-800',
+    neutral: 'border-gray-300 bg-gray-100 text-gray-800'
+  };
+  
   return (
-    <Avatar className={`${sizeClasses[size]} border-2 border-green-200 bg-green-100`}>
+    <Avatar className={`${sizeClasses[size]} border-2 ${statusStyles[status]}`}>
       <AvatarImage src={avatarUrl} alt={name} className="object-cover" />
-      <AvatarFallback className="bg-green-100 text-green-800">{initials}</AvatarFallback>
+      <AvatarFallback className={statusStyles[status]}>{initials}</AvatarFallback>
     </Avatar>
   );
 };
