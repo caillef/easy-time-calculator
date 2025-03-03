@@ -38,7 +38,7 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
       const totalAvatars = persons.length;
       
       // Determine available width
-      const availableWidth = containerWidth - 20; // subtract padding
+      const availableWidth = containerWidth - 10; // reduce padding to maximize space
       
       // Calculate width needed with different overlap values
       const fullWidth = totalAvatars * avatarSize;
@@ -47,15 +47,15 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
       if (availableWidth >= fullWidth) {
         // No overlap needed if there's enough space
         setOverlapAmount(0);
-      } else if (availableWidth >= fullWidth - (totalAvatars - 1) * 10) {
-        // Small overlap
-        setOverlapAmount(10);
       } else if (availableWidth >= fullWidth - (totalAvatars - 1) * 15) {
-        // Medium overlap
+        // Small overlap
         setOverlapAmount(15);
-      } else {
-        // Large overlap
+      } else if (availableWidth >= fullWidth - (totalAvatars - 1) * 20) {
+        // Medium overlap
         setOverlapAmount(20);
+      } else {
+        // Large overlap for very small screens
+        setOverlapAmount(24);
       }
     };
     
@@ -68,10 +68,10 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
   }, [persons.length]);
   
   return (
-    <div className={`flex items-center text-sm py-4 ${allAvailable ? 'bg-green-100 rounded-md' : ''}`}>
-      <div className="w-12 min-w-[48px] text-gray-500 text-center">{timeSlot}</div>
+    <div className={`flex items-center text-sm py-2 ${allAvailable ? 'bg-green-100 rounded-md' : ''}`}>
+      <div className="w-10 min-w-[40px] text-gray-500 text-center">{timeSlot}</div>
       
-      <div ref={containerRef} className="flex-1 flex justify-center items-center px-2">
+      <div ref={containerRef} className="flex-1 flex justify-center items-center pl-1">
         <div className="flex">
           {persons.map((person, index) => {
             const discordUser = findDiscordUser(person, discordUsers);

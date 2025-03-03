@@ -52,8 +52,9 @@ const MergedCalendar = () => {
           </div>
         </div>
         
+        {/* Horizontally scrollable container */}
         <div className="overflow-x-auto pb-4">
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-2 min-w-[1260px]">
+          <div className="flex gap-2 min-w-max">
             {weekDates.map(({ day, date }) => (
               <CalendarDayColumn
                 key={day}

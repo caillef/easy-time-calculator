@@ -14,7 +14,7 @@ const Index = () => {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-0">
         <div className="w-full">
           <TransitionWrapper>
-            <div className="flex flex-col space-y-6 px-4 md:px-8">
+            <div className="flex flex-col space-y-6 px-2 md:px-8">
               <div className="flex justify-between items-center">
                 <Header />
                 <RefreshDiscordButton />

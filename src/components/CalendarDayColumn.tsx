@@ -23,7 +23,7 @@ const CalendarDayColumn: React.FC<CalendarDayColumnProps> = ({
   const persons: Person[] = ['Léo', 'Hervé', 'Benoit', 'Corentin'];
   
   return (
-    <div className="bg-white rounded-lg shadow p-3 w-full min-w-[170px]">
+    <div className="bg-white rounded-lg shadow p-3 min-w-[150px] flex-shrink-0">
       <div className="text-center mb-2">
         <div className="font-medium">{dayName}</div>
         <div className="text-sm text-gray-500">{formattedDate}</div>
