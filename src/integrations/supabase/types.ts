@@ -17,6 +17,7 @@ export type Database = {
           person: string
           status: string
           time_slot: string
+          week_id: string
         }
         Insert: {
           created_at?: string | null
@@ -25,6 +26,7 @@ export type Database = {
           person: string
           status: string
           time_slot: string
+          week_id?: string
         }
         Update: {
           created_at?: string | null
@@ -33,6 +35,7 @@ export type Database = {
           person?: string
           status?: string
           time_slot?: string
+          week_id?: string
         }
         Relationships: []
       }
