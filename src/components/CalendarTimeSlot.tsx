@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SlotStatus } from './TimeSlot';
 import { Person } from '@/types/calendar';
 import { DiscordUser } from '@/services/discordService';
@@ -22,15 +22,57 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
   statuses, 
   discordUsers 
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [spacing, setSpacing] = useState<number>(-3); // Default spacing
+  
   // Check if all persons are available
   const allAvailable = statuses.available.length === persons.length;
+
+  // Adjust spacing based on container width
+  useEffect(() => {
+    const updateSpacing = () => {
+      if (!containerRef.current) return;
+      
+      const containerWidth = containerRef.current.clientWidth;
+      const avatarSize = 32; // 8 * 4 (size sm is 8rem with border)
+      const totalAvatars = persons.length;
+      
+      // Determine available width
+      const availableWidth = containerWidth - 20; // subtract padding
+      
+      // Calculate max width needed for fully separated avatars
+      const maxWidthNeeded = avatarSize * totalAvatars;
+      
+      // Adjust spacing based on available width
+      if (availableWidth >= maxWidthNeeded + 16) {
+        // If too much space: completely separated (avatar-size apart)
+        setSpacing(8); // positive spacing
+      } else if (availableWidth >= maxWidthNeeded - 16) {
+        // If enough space: slightly apart (half-avatar spacing)
+        setSpacing(4);
+      } else if (availableWidth >= maxWidthNeeded - 48) {
+        // If not enough space: slight overlap
+        setSpacing(-8);
+      } else {
+        // If much not enough space: more overlap
+        setSpacing(-16);
+      }
+    };
+    
+    // Initial calculation
+    updateSpacing();
+    
+    // Recalculate on window resize
+    window.addEventListener('resize', updateSpacing);
+    return () => window.removeEventListener('resize', updateSpacing);
+  }, [persons.length]);
   
   return (
     <div className={`flex items-center text-sm py-4 ${allAvailable ? 'bg-green-100 rounded-md' : ''}`}>
       <div className="w-12 min-w-[48px] text-gray-500 text-center">{timeSlot}</div>
       
-      <div className="flex-1 flex justify-center items-center px-2">
-        <div className="flex -space-x-3">
+      <div ref={containerRef} className="flex-1 flex justify-center items-center px-2">
+        <div className="flex" style={{ gap: `${spacing}px` }}>
           {persons.map((person, index) => {
             const discordUser = findDiscordUser(person, discordUsers);
             let status: SlotStatus = 'neutral';
