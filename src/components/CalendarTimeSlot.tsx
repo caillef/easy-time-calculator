@@ -25,52 +25,55 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
   // Check if all persons are available
   const allAvailable = statuses.available.length === persons.length;
   
-  // Calculate how many avatars can fit in a row
-  // Each avatar is 32px (8 * 4) wide with borders, and we have 12px (3 * 4) gap between them
-  // We'll use this for our grid layout
-  
   return (
     <div className={`flex items-center text-sm py-4 ${allAvailable ? 'bg-green-100 rounded-md' : ''}`}>
       <div className="w-12 min-w-[48px] text-gray-500 text-center">{timeSlot}</div>
       
-      <div className="flex-1 grid grid-cols-4 gap-3 justify-items-center px-2">
-        {persons.map(person => {
-          const discordUser = findDiscordUser(person, discordUsers);
-          let status: SlotStatus = 'neutral';
-          
-          if (statuses.available.includes(person)) {
-            status = 'available';
-          } else if (statuses.unavailable.includes(person)) {
-            status = 'unavailable';
-          }
-          
-          return (
-            <div 
-              key={`${person}-${status}`} 
-              className="relative" 
-              title={`${person} (${status === 'available' ? 'Disponible' : status === 'unavailable' ? 'Indisponible' : 'Pas encore décidé'})`}
-            >
-              {discordUser ? (
-                <DiscordAvatar 
-                  name={person} 
-                  userId={discordUser.discord_user_id} 
-                  avatarId={discordUser.avatar} 
-                  size="sm" 
-                  status={status}
-                />
-              ) : (
-                <div className={`
-                  w-8 h-8 rounded-full flex items-center justify-center text-xs
-                  ${status === 'available' ? 'border-4 border-green-500 bg-green-100 text-green-800' : 
-                    status === 'unavailable' ? 'border-4 border-red-500 bg-red-100 text-red-800' : 
-                    'border-2 border-gray-300 bg-gray-100 text-gray-800 opacity-30'}
-                `}>
-                  {person.charAt(0)}
-                </div>
-              )}
-            </div>
-          );
-        })}
+      <div className="flex-1 flex justify-center items-center px-2">
+        <div className="flex -space-x-3">
+          {persons.map((person, index) => {
+            const discordUser = findDiscordUser(person, discordUsers);
+            let status: SlotStatus = 'neutral';
+            
+            if (statuses.available.includes(person)) {
+              status = 'available';
+            } else if (statuses.unavailable.includes(person)) {
+              status = 'unavailable';
+            }
+            
+            // Apply z-index based on position (higher index = lower z-index)
+            // This ensures the leftmost avatar is on top
+            const zIndex = persons.length - index;
+            
+            return (
+              <div 
+                key={`${person}-${status}`} 
+                className="relative" 
+                style={{ zIndex }}
+                title={`${person} (${status === 'available' ? 'Disponible' : status === 'unavailable' ? 'Indisponible' : 'Pas encore décidé'})`}
+              >
+                {discordUser ? (
+                  <DiscordAvatar 
+                    name={person} 
+                    userId={discordUser.discord_user_id} 
+                    avatarId={discordUser.avatar} 
+                    size="sm" 
+                    status={status}
+                  />
+                ) : (
+                  <div className={`
+                    w-8 h-8 rounded-full flex items-center justify-center text-xs
+                    ${status === 'available' ? 'border-4 border-green-500 bg-green-100 text-green-800' : 
+                      status === 'unavailable' ? 'border-4 border-red-500 bg-red-100 text-red-800' : 
+                      'border-2 border-gray-300 bg-gray-100 text-gray-800 opacity-30'}
+                  `}>
+                    {person.charAt(0)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
