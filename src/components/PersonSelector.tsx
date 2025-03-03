@@ -9,11 +9,11 @@ interface PersonSelectorProps {
   className?: string;
 }
 
-const PEOPLE: { name: Person; emoji: string }[] = [
-  { name: 'Léo', emoji: '🦤' },
-  { name: 'Hervé', emoji: '🚀' },
-  { name: 'Benoit', emoji: '💎' },
-  { name: 'Corentin', emoji: '🥳' }
+const PEOPLE: { name: Person; initial: string }[] = [
+  { name: 'Léo', initial: 'L' },
+  { name: 'Hervé', initial: 'H' },
+  { name: 'Benoit', initial: 'B' },
+  { name: 'Corentin', initial: 'C' }
 ];
 
 const PersonSelector: React.FC<PersonSelectorProps> = ({ className }) => {
@@ -35,7 +35,6 @@ const PersonSelector: React.FC<PersonSelectorProps> = ({ className }) => {
               )}
               onClick={() => setSelectedPerson(person.name as any)}
             >
-              <span>{person.emoji}</span>
               <span>{person.name}</span>
             </button>
           ))}

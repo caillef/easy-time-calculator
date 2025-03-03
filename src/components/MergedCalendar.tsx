@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
@@ -18,10 +19,10 @@ const TIMES = [
 ];
 
 const PEOPLE = [
-  { name: 'Léo', emoji: '🦤', color: '#FFB6C1' }, // Light Pink
-  { name: 'Hervé', emoji: '🚀', color: '#ADD8E6' }, // Light Blue
-  { name: 'Benoit', emoji: '💎', color: '#90EE90' }, // Light Green
-  { name: 'Corentin', emoji: '🥳', color: '#FFFFE0' }  // Light Yellow
+  { name: 'Léo', initial: 'L', color: '#FFB6C1' }, // Light Pink
+  { name: 'Hervé', initial: 'H', color: '#ADD8E6' }, // Light Blue
+  { name: 'Benoit', initial: 'B', color: '#90EE90' }, // Light Green
+  { name: 'Corentin', initial: 'C', color: '#FFFFE0' }  // Light Yellow
 ];
 
 const getStatusClass = (status: SlotStatus | undefined) => {
@@ -98,8 +99,7 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
               key={person.name} 
               className="flex items-center gap-1.5"
             >
-              <span className="text-lg">{person.emoji}</span>
-              <span className="text-sm font-medium">{person.name}</span>
+              <span className="text-sm font-medium">{person.name} ({person.initial})</span>
             </div>
           ))}
         </div>
@@ -153,9 +153,9 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
                           const status = calendarData[currentWeekId]?.[person.name]?.[day]?.[time];
                           return (
                             <div 
-                              key={person.emoji}
+                              key={person.initial}
                               className={cn(
-                                "h-6 w-6 flex items-center justify-center rounded-full",
+                                "h-6 w-6 flex items-center justify-center rounded-full font-medium text-xs",
                                 getStatusClass(status)
                               )}
                               style={{ 
@@ -165,7 +165,7 @@ const MergedCalendar: React.FC<MergedCalendarProps> = ({ className }) => {
                               }}
                               title={`${person.name}: ${status || 'Non défini'}`}
                             >
-                              <span>{person.emoji}</span>
+                              {person.initial}
                             </div>
                           );
                         })}

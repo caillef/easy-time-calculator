@@ -2,7 +2,6 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Calendar from '@/components/Calendar';
-import Legend from '@/components/Legend';
 import TransitionWrapper from '@/components/TransitionWrapper';
 import { CalendarProvider } from '@/context/CalendarContext';
 import PersonSelector from '@/components/PersonSelector';
@@ -17,7 +16,6 @@ const Index = () => {
             <div className="flex flex-col space-y-6">
               <Header />
               <MergedCalendar />
-              <Legend />
               <PersonSelector />
               <Calendar />
               
