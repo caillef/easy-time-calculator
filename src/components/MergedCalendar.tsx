@@ -26,7 +26,7 @@ const MergedCalendar = () => {
 
   return (
     <TransitionWrapper>
-      <div className="mb-8 overflow-x-auto w-full">
+      <div className="mb-8 w-full">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Disponibilités du groupe</h2>
           
@@ -52,16 +52,18 @@ const MergedCalendar = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-2 min-w-[700px]">
-          {weekDates.map(({ day, date }) => (
-            <CalendarDayColumn
-              key={day}
-              day={day}
-              date={date}
-              dayAvailability={mergedAvailability[day] || {}}
-              discordUsers={discordUsers}
-            />
-          ))}
+        <div className="overflow-x-auto pb-4">
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-2 min-w-[1260px]">
+            {weekDates.map(({ day, date }) => (
+              <CalendarDayColumn
+                key={day}
+                day={day}
+                date={date}
+                dayAvailability={mergedAvailability[day] || {}}
+                discordUsers={discordUsers}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </TransitionWrapper>

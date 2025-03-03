@@ -25,11 +25,15 @@ const CalendarTimeSlot: React.FC<CalendarTimeSlotProps> = ({
   // Check if all persons are available
   const allAvailable = statuses.available.length === persons.length;
   
+  // Calculate how many avatars can fit in a row
+  // Each avatar is 32px (8 * 4) wide with borders, and we have 12px (3 * 4) gap between them
+  // We'll use this for our grid layout
+  
   return (
     <div className={`flex items-center text-sm py-4 ${allAvailable ? 'bg-green-100 rounded-md' : ''}`}>
       <div className="w-12 min-w-[48px] text-gray-500 text-center">{timeSlot}</div>
       
-      <div className="flex-1 flex flex-wrap justify-center items-center gap-3 px-2">
+      <div className="flex-1 grid grid-cols-4 gap-3 justify-items-center px-2">
         {persons.map(person => {
           const discordUser = findDiscordUser(person, discordUsers);
           let status: SlotStatus = 'neutral';
