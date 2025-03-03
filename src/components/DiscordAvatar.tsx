@@ -35,17 +35,17 @@ const DiscordAvatar: React.FC<DiscordAvatarProps> = ({
     lg: 'h-12 w-12'
   };
   
-  // Status style mappings
+  // Status style mappings with thicker borders and opacity adjustment for neutral
   const statusStyles = {
-    available: 'border-green-300 bg-green-100 text-green-800',
-    unavailable: 'border-red-300 bg-red-100 text-red-800',
-    neutral: 'border-gray-300 bg-gray-100 text-gray-800'
+    available: 'border-4 border-green-500 bg-green-100 text-green-800',
+    unavailable: 'border-4 border-red-500 bg-red-100 text-red-800',
+    neutral: 'border-2 border-gray-300 bg-gray-100 text-gray-800 opacity-30'
   };
   
   return (
-    <Avatar className={`${sizeClasses[size]} border-2 ${statusStyles[status]}`}>
+    <Avatar className={`${sizeClasses[size]} ${statusStyles[status]}`}>
       <AvatarImage src={avatarUrl} alt={name} className="object-cover" />
-      <AvatarFallback className={statusStyles[status]}>{initials}</AvatarFallback>
+      <AvatarFallback className={status === 'neutral' ? 'opacity-30' : ''}>{initials}</AvatarFallback>
     </Avatar>
   );
 };
