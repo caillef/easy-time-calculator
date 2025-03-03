@@ -15,13 +15,17 @@ const Index = () => {
         <div className="w-full">
           <TransitionWrapper>
             <div className="flex flex-col space-y-6 px-4 md:px-8">
-              <div className="flex justify-between items-center">
-                <Header />
-                <RefreshDiscordButton />
+              <div className="flex flex-col space-y-4">
+                <div className="flex justify-between items-start">
+                  <Header className="flex-1" />
+                  <div className="pt-6">
+                    <RefreshDiscordButton />
+                  </div>
+                </div>
+                <MergedCalendar />
+                <PersonSelector />
+                <Calendar />
               </div>
-              <MergedCalendar />
-              <PersonSelector />
-              <Calendar />
               
               <TransitionWrapper delay={400}>
                 <footer className="text-center text-sm text-muted-foreground mt-8 pb-8">
