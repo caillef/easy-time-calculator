@@ -90,14 +90,14 @@ const Calendar = ({ className }: CalendarProps) => {
           {/* Time slots */}
           {TIMES.map((time, index) => (
             <React.Fragment key={time}>
-              {/* Add separator before 18:00 */}
+              {/* Add separator before 18:00 with consistent spacing */}
               {time === '18:00' && (
                 <React.Fragment>
-                  <div className="col-span-1 border-t border-gray-300 my-2"></div>
+                  <div className="col-span-1 border-t border-gray-300 my-4"></div>
                   {DAYS.map((day, dayIndex) => (
                     <div 
                       key={`separator-${day}`} 
-                      className="col-span-1 border-t border-gray-300 my-2"
+                      className="col-span-1 border-t border-gray-300 my-4"
                     ></div>
                   ))}
                 </React.Fragment>
