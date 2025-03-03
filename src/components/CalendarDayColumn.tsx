@@ -28,20 +28,25 @@ const CalendarDayColumn: React.FC<CalendarDayColumnProps> = ({
         <div className="font-medium">{dayName}</div>
         <div className="text-sm text-gray-500">{formattedDate}</div>
       </div>
-      <div className="space-y-4">
-        {Object.entries(dayAvailability || {}).map(([timeSlot, statuses]) => {
+      <div>
+        {Object.entries(dayAvailability || {}).map(([timeSlot, statuses], index, arr) => {
           // Only show time slots that have at least one person with any status
           const hasAnyPerson = Object.values(statuses).some(persons => persons.length > 0);
           if (!hasAnyPerson) return null;
           
+          // Check if we need a separator (only between 17:00 and 18:00)
+          const needsSeparator = timeSlot === '17:00';
+          
           return (
-            <CalendarTimeSlot
-              key={`${day}-${timeSlot}`}
-              timeSlot={timeSlot}
-              persons={persons}
-              statuses={statuses}
-              discordUsers={discordUsers}
-            />
+            <React.Fragment key={`${day}-${timeSlot}`}>
+              {needsSeparator && <div className="border-t border-gray-200 my-3"></div>}
+              <CalendarTimeSlot
+                timeSlot={timeSlot}
+                persons={persons}
+                statuses={statuses}
+                discordUsers={discordUsers}
+              />
+            </React.Fragment>
           );
         })}
       </div>
