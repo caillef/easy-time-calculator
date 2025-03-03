@@ -25,7 +25,7 @@ const MergedCalendar = () => {
 
   return (
     <TransitionWrapper>
-      <div className="mb-8 overflow-x-auto w-full -mx-4 sm:-mx-8 px-4 sm:px-8">
+      <div className="mb-8 overflow-x-auto w-full">
         <h2 className="text-xl font-bold mb-2">Disponibilités du groupe</h2>
         <div className="grid grid-cols-1 md:grid-cols-7 gap-2 min-w-[700px]">
           {weekDates.map(({ day, date }) => (
