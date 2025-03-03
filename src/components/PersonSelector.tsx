@@ -1,20 +1,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { useCalendar } from '@/context/CalendarContext';
-import { cn } from '@/lib/utils';
-import TransitionWrapper from './TransitionWrapper';
 import { Person } from '@/types/calendar';
-import { DiscordUser, fetchDiscordUsers, getDiscordAvatarUrl, refreshDiscordUsers } from '@/services/discordService';
-import { Loader2 } from 'lucide-react';
+import TransitionWrapper from './TransitionWrapper';
+import { fetchDiscordUsers, type DiscordUser } from '@/services/discordService';
+import DiscordAvatar from './DiscordAvatar';
 
-interface PersonSelectorProps {
-  className?: string;
-}
-
-const PersonSelector: React.FC<PersonSelectorProps> = ({ className }) => {
+const PersonSelector = () => {
   const { selectedPerson, setSelectedPerson } = useCalendar();
   const [discordUsers, setDiscordUsers] = useState<DiscordUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // List of persons
+  const persons: Person[] = ['Léo', 'Hervé', 'Benoit', 'Corentin'];
 
   useEffect(() => {
     const loadDiscordUsers = async () => {
@@ -22,71 +20,53 @@ const PersonSelector: React.FC<PersonSelectorProps> = ({ className }) => {
       const users = await fetchDiscordUsers();
       setDiscordUsers(users);
       setIsLoading(false);
-      
-      // Refresh Discord data in the background
-      refreshDiscordUsers().then((success) => {
-        if (success) {
-          // Reload the data after refresh
-          fetchDiscordUsers().then(setDiscordUsers);
-        }
-      });
     };
-    
+
     loadDiscordUsers();
   }, []);
 
-  const getPersonUser = (personName: Person): DiscordUser | undefined => {
-    return discordUsers.find(user => user.name === personName);
+  const findDiscordUser = (name: string) => {
+    return discordUsers.find(user => user.name === name);
   };
 
   return (
-    <TransitionWrapper delay={150} className={cn('mb-8', className)}>
-      <div className="glass rounded-xl p-5">
-        <h3 className="text-md font-medium mb-4">Sélectionnez une personne:</h3>
-        {isLoading ? (
-          <div className="flex justify-center p-4">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-3">
-            {discordUsers.map(user => (
+    <div className="mb-6">
+      <TransitionWrapper>
+        <h2 className="text-xl font-bold mb-2">Sélectionnez une personne</h2>
+        <div className="flex flex-wrap gap-3">
+          {persons.map((person) => {
+            const isSelected = selectedPerson === person;
+            const discordUser = findDiscordUser(person);
+            
+            return (
               <button
-                key={user.id}
-                className={cn(
-                  'px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2',
-                  selectedPerson === user.name 
-                    ? 'bg-primary text-primary-foreground shadow-md' 
-                    : 'bg-secondary hover:bg-secondary/80'
-                )}
-                onClick={() => setSelectedPerson(user.name as Person)}
+                key={person}
+                onClick={() => setSelectedPerson(person)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${
+                  isSelected
+                    ? 'bg-blue-100 border-blue-300 text-blue-800'
+                    : 'bg-white border-gray-200 hover:bg-gray-50'
+                }`}
               >
-                <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200">
-                  <img 
-                    src={getDiscordAvatarUrl(user.discord_user_id, user.avatar)}
-                    alt={user.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Fallback to initial if image fails to load
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement!.innerText = user.name.charAt(0);
-                      e.currentTarget.parentElement!.style.display = 'flex';
-                      e.currentTarget.parentElement!.style.justifyContent = 'center';
-                      e.currentTarget.parentElement!.style.alignItems = 'center';
-                    }}
+                {discordUser ? (
+                  <DiscordAvatar 
+                    name={person} 
+                    userId={discordUser.discord_user_id} 
+                    avatarId={discordUser.avatar} 
+                    size="sm" 
                   />
-                </div>
-                <span>{user.name}</span>
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700">
+                    {person.charAt(0)}
+                  </div>
+                )}
+                <span>{person}</span>
               </button>
-            ))}
-          </div>
-        )}
-        {!selectedPerson && (
-          <p className="text-sm text-muted-foreground mt-3">
-            Veuillez sélectionner une personne pour modifier son calendrier
-          </p>
-        )}
-      </div>
-    </TransitionWrapper>
+            );
+          })}
+        </div>
+      </TransitionWrapper>
+    </div>
   );
 };
 
