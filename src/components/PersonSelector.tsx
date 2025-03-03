@@ -3,12 +3,13 @@ import React from 'react';
 import { useCalendar } from '@/context/CalendarContext';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
+import { Person } from '@/types/calendar';
 
 interface PersonSelectorProps {
   className?: string;
 }
 
-const PEOPLE = [
+const PEOPLE: { name: Person; emoji: string }[] = [
   { name: 'Léo', emoji: '🦤' },
   { name: 'Hervé', emoji: '🚀' },
   { name: 'Benoit', emoji: '💎' },

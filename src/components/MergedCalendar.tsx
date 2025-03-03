@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
@@ -7,12 +6,12 @@ import { SlotStatus } from './TimeSlot';
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { DAYS } from '@/utils/calendarUtils';
 
 interface MergedCalendarProps {
   className?: string;
 }
 
-const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 const TIMES = [
   '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', 
   '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
