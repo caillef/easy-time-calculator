@@ -76,7 +76,7 @@ export const applyRecurringStatus = async (
   day: string,
   timeSlot: string,
   status: SlotStatus,
-  weeksToApply: number = 52 // Default to 1 year of future weeks
+  weeksToApply: number = 0 // Set to 0 to automatically calculate remaining weeks in current year
 ): Promise<boolean> => {
   try {
     console.log(`Applying recurring status: ${person}, ${day}, ${timeSlot}, ${status}`);
@@ -87,9 +87,19 @@ export const applyRecurringStatus = async (
     const week = parseInt(weekStr);
     
     // Create a date for the current week (approximate)
-    // This is just to have a base date, we'll calculate actual weeks from this
     const currentDate = new Date();
     currentDate.setFullYear(year);
+    
+    // If weeksToApply is 0, calculate remaining weeks in the current year
+    if (weeksToApply === 0) {
+      // We're limiting to the current year, so calculate how many weeks are left in the year
+      const currentYear = year;
+      const lastWeekOfYear = 52; // Approximate number of weeks in a year
+      
+      // Calculate remaining weeks in the year
+      weeksToApply = lastWeekOfYear - week;
+      console.log(`Auto-calculated ${weeksToApply} remaining weeks in year ${currentYear}`);
+    }
     
     // Create updates batch for future weeks
     const updates = [];
@@ -103,7 +113,7 @@ export const applyRecurringStatus = async (
       status
     });
     
-    // Add future weeks
+    // Add future weeks (limited to end of current year)
     for (let i = 1; i <= weeksToApply; i++) {
       // Calculate the date for the future week
       const futureDate = addWeeks(currentDate, i);
@@ -121,7 +131,7 @@ export const applyRecurringStatus = async (
       }
     }
     
-    console.log(`Generated ${updates.length} recurring updates`);
+    console.log(`Generated ${updates.length} recurring updates for the current year`);
     
     // Process each update individually instead of batching them
     // This avoids the "ON CONFLICT DO UPDATE command cannot affect row a second time" error
@@ -141,7 +151,7 @@ export const applyRecurringStatus = async (
     
     toast({
       title: "Récurrence activée",
-      description: `Ce statut sera appliqué à toutes les semaines futures (${day}, ${timeSlot})`,
+      description: `Ce statut sera appliqué jusqu'à la fin de l'année (${day}, ${timeSlot})`,
     });
     
     return true;
