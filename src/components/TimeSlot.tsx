@@ -77,36 +77,37 @@ const TimeSlot = ({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
-            onClick={onClick}
-            disabled={disabled}
-            className={cn(
-              'time-slot rounded-md h-10 m-1 flex items-center justify-center group relative',
-              statusClasses[status],
-              disabled && 'opacity-50 cursor-not-allowed'
-            )}
-          >
-            {statusIcons[status]}
+          <div className="relative">
+            <button
+              onClick={onClick}
+              disabled={disabled}
+              className={cn(
+                'time-slot rounded-md h-10 m-1 flex items-center justify-center',
+                statusClasses[status],
+                disabled && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              {statusIcons[status]}
+            </button>
             
-            {/* Bouton de récurrence intégré qui apparaît au survol */}
+            {/* Bouton de récurrence positionné à droite */}
             {showRecurrenceOption && (
-              <div 
-                className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 group-hover:opacity-100 transition-opacity rounded-md"
+              <button 
+                className="absolute top-1/2 -translate-y-1/2 right-0 w-6 h-6 flex items-center justify-center bg-white/90 rounded-full shadow-sm opacity-0 hover:opacity-100 transition-opacity"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onRecurrenceClick();
+                  onRecurrenceClick?.();
                 }}
+                title="Appliquer à toutes les semaines futures"
               >
-                <div className="bg-white/90 rounded-md p-1.5">
-                  <Repeat className="h-4 w-4 text-gray-600" />
-                </div>
-              </div>
+                <Repeat className="h-3 w-3 text-gray-600" />
+              </button>
             )}
-          </button>
+          </div>
         </TooltipTrigger>
         <TooltipContent>
           {showRecurrenceOption ? (
-            <p>Cliquez pour changer le statut, survolez pour appliquer à toutes les semaines futures</p>
+            <p>Cliquez pour changer le statut, utilisez le bouton à droite pour appliquer à toutes les semaines futures</p>
           ) : (
             <p>Cliquez pour changer le statut</p>
           )}

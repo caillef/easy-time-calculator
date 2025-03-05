@@ -97,7 +97,7 @@
   }
 
   .time-slot {
-    @apply transition-all duration-300 ease-out;
+    @apply transition-all duration-300 ease-out pr-5;
     -webkit-tap-highlight-color: transparent;
   }
 
