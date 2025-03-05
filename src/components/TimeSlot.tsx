@@ -70,8 +70,8 @@ const TimeSlot = ({
     );
   }
 
-  // Si nous avons une fonction onRecurrenceClick et que le statut n'est pas neutre
-  const showRecurrenceOption = status !== 'neutral' && onRecurrenceClick;
+  // Show recurrence option for all statuses, including neutral
+  const showRecurrenceOption = onRecurrenceClick !== undefined;
 
   return (
     <TooltipProvider>
