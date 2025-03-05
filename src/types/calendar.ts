@@ -27,4 +27,5 @@ export interface CalendarContextType {
   weekDates: { day: string; date: Date }[];
   formatWeekRange: () => string;
   currentWeekId: string;
+  refreshCalendarData: () => Promise<CalendarData | null>;
 }

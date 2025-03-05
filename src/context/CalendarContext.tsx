@@ -50,6 +50,14 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
   // Format the week range for display
   const formatWeekRange = () => formatWeekRangeUtil(currentWeek);
 
+  // Refresh calendar data from the database
+  const refreshCalendarData = async (): Promise<CalendarData | null> => {
+    setIsLoading(true);
+    const data = await fetchCalendarData();
+    setIsLoading(false);
+    return data;
+  };
+
   // Initialize calendar data structure if needed
   useEffect(() => {
     setCalendarData(prev => initializeCalendarWeek(currentWeekId, prev));
@@ -80,6 +88,7 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
       weekDates,
       formatWeekRange,
       currentWeekId,
+      refreshCalendarData,
       setCalendarData: (newData) => {
         // If it's a function, execute it to get the new state
         if (typeof newData === 'function') {

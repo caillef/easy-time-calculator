@@ -6,6 +6,7 @@ import TimeSlot, { SlotStatus } from './TimeSlot';
 import { useCalendar } from '@/context/CalendarContext';
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { DAYS } from '@/utils/calendarUtils';
+import { applyRecurringStatus } from '@/services/calendarService';
 
 interface CalendarProps {
   className?: string;
@@ -81,6 +82,31 @@ const Calendar = ({ className }: CalendarProps) => {
     });
   };
 
+  const handleRecurrenceClick = async (day: string, time: string) => {
+    if (!selectedPerson) return;
+    
+    // Get current status
+    const status = getSlotStatus(day, time);
+    if (status === 'neutral') return;
+    
+    // Apply the recurring status to all future weeks
+    const success = await applyRecurringStatus(
+      currentWeekId,
+      selectedPerson,
+      day,
+      time,
+      status
+    );
+    
+    if (success) {
+      // Refresh calendar data to show updates
+      const updatedData = await useCalendar().refreshCalendarData();
+      if (updatedData) {
+        setCalendarData(updatedData);
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <TransitionWrapper delay={200} className={cn('flex justify-center items-center p-10', className)}>
@@ -148,6 +174,7 @@ const Calendar = ({ className }: CalendarProps) => {
                   time={time}
                   status={getSlotStatus(day, time)}
                   onClick={() => handleSlotClick(day, time)}
+                  onRecurrenceClick={() => handleRecurrenceClick(day, time)}
                   disabled={!selectedPerson}
                 />
               ))}

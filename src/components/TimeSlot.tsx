@@ -1,9 +1,15 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Check, X, Minus } from 'lucide-react';
+import { Check, X, Minus, Repeat } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type SlotStatus = 'unavailable' | 'available' | 'neutral';
 
@@ -15,6 +21,7 @@ interface TimeSlotProps {
   isTimeLabel?: boolean;
   disabled?: boolean;
   onClick?: () => void;
+  onRecurrenceClick?: () => void;
   date?: Date;
 }
 
@@ -26,6 +33,7 @@ const TimeSlot = ({
   isTimeLabel = false,
   disabled = false,
   onClick,
+  onRecurrenceClick,
   date
 }: TimeSlotProps) => {
   
@@ -63,17 +71,42 @@ const TimeSlot = ({
   }
 
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        'time-slot rounded-md h-10 m-1 flex items-center justify-center',
-        statusClasses[status],
-        disabled && 'opacity-50 cursor-not-allowed'
+    <div className="relative">
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        className={cn(
+          'time-slot rounded-md h-10 m-1 flex items-center justify-center',
+          statusClasses[status],
+          disabled && 'opacity-50 cursor-not-allowed'
+        )}
+      >
+        {statusIcons[status]}
+      </button>
+      
+      {/* Bouton de récurrence */}
+      {status !== 'neutral' && onRecurrenceClick && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRecurrenceClick();
+                }}
+                className="absolute top-0 right-0 -mt-1 -mr-1 h-5 w-5 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-gray-100 border border-gray-200"
+                aria-label="Activer la récurrence"
+              >
+                <Repeat className="h-3 w-3 text-gray-600" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Appliquer ce statut à toutes les semaines futures</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
-    >
-      {statusIcons[status]}
-    </button>
+    </div>
   );
 };
 
