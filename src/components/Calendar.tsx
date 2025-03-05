@@ -88,9 +88,9 @@ const Calendar = ({ className }: CalendarProps) => {
     
     // Get current status
     const status = getSlotStatus(day, time);
-    if (status === 'neutral') return;
     
     // Apply the recurring status to all future weeks
+    // Removed the check that prevents neutral status from being recurring
     const success = await applyRecurringStatus(
       currentWeekId,
       selectedPerson,
