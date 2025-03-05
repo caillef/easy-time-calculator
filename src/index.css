@@ -96,12 +96,14 @@
     grid-auto-rows: minmax(40px, auto);
   }
 
-  .time-slot {
-    @apply transition-all duration-300 ease-out pr-5;
+  .time-slot-main {
+    @apply transition-all duration-300 ease-out;
     -webkit-tap-highlight-color: transparent;
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
   }
 
-  .time-slot:hover:not(:disabled) {
+  .time-slot-main:hover:not(:disabled) {
     @apply transform scale-105 shadow-md;
   }
   

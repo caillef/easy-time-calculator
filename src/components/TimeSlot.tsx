@@ -77,12 +77,13 @@ const TimeSlot = ({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="relative">
+          <div className="flex items-center m-1 h-10 rounded-md overflow-hidden">
+            {/* Main button - 80% width */}
             <button
               onClick={onClick}
               disabled={disabled}
               className={cn(
-                'time-slot rounded-md h-10 m-1 flex items-center justify-center',
+                'time-slot-main w-4/5 h-full flex items-center justify-center',
                 statusClasses[status],
                 disabled && 'opacity-50 cursor-not-allowed'
               )}
@@ -90,10 +91,10 @@ const TimeSlot = ({
               {statusIcons[status]}
             </button>
             
-            {/* Bouton de récurrence positionné à droite */}
-            {showRecurrenceOption && (
+            {/* Recurrence button - 20% width */}
+            {showRecurrenceOption ? (
               <button 
-                className="absolute top-1/2 -translate-y-1/2 right-0 w-6 h-6 flex items-center justify-center bg-white/90 rounded-full shadow-sm opacity-0 hover:opacity-100 transition-opacity"
+                className="w-1/5 h-full flex items-center justify-center bg-white/90 hover:bg-gray-200/90 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRecurrenceClick?.();
@@ -102,6 +103,8 @@ const TimeSlot = ({
               >
                 <Repeat className="h-3 w-3 text-gray-600" />
               </button>
+            ) : (
+              <div className="w-1/5 h-full bg-gray-100/50"></div>
             )}
           </div>
         </TooltipTrigger>
