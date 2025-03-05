@@ -109,32 +109,33 @@ export const applyRecurringStatus = async (
       const futureDate = addWeeks(currentDate, i);
       const futureWeekId = getWeekId(futureDate);
       
-      // Add to batch updates
-      updates.push({
-        week_id: futureWeekId,
-        person,
-        day,
-        time_slot: timeSlot,
-        status
-      });
+      // Add to batch updates - make sure we're not adding duplicates
+      if (futureWeekId !== startWeekId) {
+        updates.push({
+          week_id: futureWeekId,
+          person,
+          day,
+          time_slot: timeSlot,
+          status
+        });
+      }
     }
     
     console.log(`Generated ${updates.length} recurring updates`);
     
-    // Batch upsert all future entries (50 at a time to avoid overloading)
-    const batchSize = 50;
-    for (let i = 0; i < updates.length; i += batchSize) {
-      const batch = updates.slice(i, i + batchSize);
+    // Process each update individually instead of batching them
+    // This avoids the "ON CONFLICT DO UPDATE command cannot affect row a second time" error
+    for (const update of updates) {
       const { error } = await supabase
         .from('calendar_data')
         .upsert(
-          batch,
+          update,
           { onConflict: 'week_id,person,day,time_slot' }
         );
       
       if (error) {
-        console.error('Error in batch', i, error);
-        throw error;
+        console.error('Error updating entry', update, error);
+        // Continue with other updates even if one fails
       }
     }
     
