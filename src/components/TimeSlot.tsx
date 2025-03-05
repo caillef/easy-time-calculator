@@ -70,43 +70,49 @@ const TimeSlot = ({
     );
   }
 
+  // Si nous avons une fonction onRecurrenceClick et que le statut n'est pas neutre
+  const showRecurrenceOption = status !== 'neutral' && onRecurrenceClick;
+
   return (
-    <div className="relative">
-      <button
-        onClick={onClick}
-        disabled={disabled}
-        className={cn(
-          'time-slot rounded-md h-10 m-1 flex items-center justify-center',
-          statusClasses[status],
-          disabled && 'opacity-50 cursor-not-allowed'
-        )}
-      >
-        {statusIcons[status]}
-      </button>
-      
-      {/* Bouton de récurrence */}
-      {status !== 'neutral' && onRecurrenceClick && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button 
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={onClick}
+            disabled={disabled}
+            className={cn(
+              'time-slot rounded-md h-10 m-1 flex items-center justify-center group relative',
+              statusClasses[status],
+              disabled && 'opacity-50 cursor-not-allowed'
+            )}
+          >
+            {statusIcons[status]}
+            
+            {/* Bouton de récurrence intégré qui apparaît au survol */}
+            {showRecurrenceOption && (
+              <div 
+                className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 group-hover:opacity-100 transition-opacity rounded-md"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRecurrenceClick();
                 }}
-                className="absolute top-0 right-0 -mt-1 -mr-1 h-5 w-5 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-gray-100 border border-gray-200"
-                aria-label="Activer la récurrence"
               >
-                <Repeat className="h-3 w-3 text-gray-600" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Appliquer ce statut à toutes les semaines futures</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
-    </div>
+                <div className="bg-white/90 rounded-md p-1.5">
+                  <Repeat className="h-4 w-4 text-gray-600" />
+                </div>
+              </div>
+            )}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {showRecurrenceOption ? (
+            <p>Cliquez pour changer le statut, survolez pour appliquer à toutes les semaines futures</p>
+          ) : (
+            <p>Cliquez pour changer le statut</p>
+          )}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 

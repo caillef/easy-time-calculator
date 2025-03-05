@@ -3,7 +3,7 @@ import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CalendarData } from "@/types/calendar";
 import { transformDatabaseData, getWeekId } from "@/utils/calendarUtils";
-import { addWeeks, format } from 'date-fns';
+import { addWeeks, format, parseISO } from 'date-fns';
 import { SlotStatus } from "@/components/TimeSlot";
 
 export const fetchCalendarData = async (): Promise<CalendarData | null> => {
@@ -79,20 +79,34 @@ export const applyRecurringStatus = async (
   weeksToApply: number = 52 // Default to 1 year of future weeks
 ): Promise<boolean> => {
   try {
+    console.log(`Applying recurring status: ${person}, ${day}, ${timeSlot}, ${status}`);
+    
     // Parse the starting week ID to get year and week number
     const [yearStr, weekStr] = startWeekId.split('-');
-    let year = parseInt(yearStr);
-    let week = parseInt(weekStr);
+    const year = parseInt(yearStr);
+    const week = parseInt(weekStr);
     
-    // Create a date for the current week
-    let currentWeekDate = new Date();
+    // Create a date for the current week (approximate)
+    // This is just to have a base date, we'll calculate actual weeks from this
+    const currentDate = new Date();
+    currentDate.setFullYear(year);
     
     // Create updates batch for future weeks
     const updates = [];
     
-    for (let i = 0; i < weeksToApply; i++) {
-      // Calculate the date for the next week
-      const futureDate = addWeeks(currentWeekDate, i);
+    // Start with the current week
+    updates.push({
+      week_id: startWeekId,
+      person,
+      day,
+      time_slot: timeSlot,
+      status
+    });
+    
+    // Add future weeks
+    for (let i = 1; i <= weeksToApply; i++) {
+      // Calculate the date for the future week
+      const futureDate = addWeeks(currentDate, i);
       const futureWeekId = getWeekId(futureDate);
       
       // Add to batch updates
@@ -105,19 +119,28 @@ export const applyRecurringStatus = async (
       });
     }
     
-    // Batch upsert all future entries
-    const { error } = await supabase
-      .from('calendar_data')
-      .upsert(
-        updates,
-        { onConflict: 'week_id,person,day,time_slot' }
-      );
+    console.log(`Generated ${updates.length} recurring updates`);
     
-    if (error) throw error;
+    // Batch upsert all future entries (50 at a time to avoid overloading)
+    const batchSize = 50;
+    for (let i = 0; i < updates.length; i += batchSize) {
+      const batch = updates.slice(i, i + batchSize);
+      const { error } = await supabase
+        .from('calendar_data')
+        .upsert(
+          batch,
+          { onConflict: 'week_id,person,day,time_slot' }
+        );
+      
+      if (error) {
+        console.error('Error in batch', i, error);
+        throw error;
+      }
+    }
     
     toast({
       title: "Récurrence activée",
-      description: "Ce statut sera appliqué aux semaines futures",
+      description: `Ce statut sera appliqué à toutes les semaines futures (${day}, ${timeSlot})`,
     });
     
     return true;

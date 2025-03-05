@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
 import TimeSlot, { SlotStatus } from './TimeSlot';
@@ -27,7 +27,8 @@ const Calendar = ({ className }: CalendarProps) => {
     prevWeek, 
     weekDates,
     formatWeekRange,
-    currentWeekId
+    currentWeekId,
+    refreshCalendarData
   } = useCalendar();
 
   const getSlotStatus = (day: string, time: string): SlotStatus => {
@@ -100,7 +101,7 @@ const Calendar = ({ className }: CalendarProps) => {
     
     if (success) {
       // Refresh calendar data to show updates
-      const updatedData = await useCalendar().refreshCalendarData();
+      const updatedData = await refreshCalendarData();
       if (updatedData) {
         setCalendarData(updatedData);
       }
@@ -157,7 +158,7 @@ const Calendar = ({ className }: CalendarProps) => {
           ))}
           
           {/* Time slots */}
-          {TIMES.map((time, index) => (
+          {TIMES.map((time) => (
             <React.Fragment key={time}>
               {/* Time slot row */}
               <TimeSlot
@@ -181,15 +182,15 @@ const Calendar = ({ className }: CalendarProps) => {
               
               {/* Add separator after 17:00 and before 18:00 */}
               {time === '17:00' && (
-                <React.Fragment>
+                <>
                   <div className="col-span-1 border-t border-gray-300 my-4"></div>
-                  {DAYS.map((day, dayIndex) => (
+                  {DAYS.map((day) => (
                     <div 
                       key={`separator-${day}`} 
                       className="col-span-1 border-t border-gray-300 my-4"
                     ></div>
                   ))}
-                </React.Fragment>
+                </>
               )}
             </React.Fragment>
           ))}
