@@ -1,12 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import TransitionWrapper from './TransitionWrapper';
 import TimeSlot, { SlotStatus } from './TimeSlot';
 import { useCalendar } from '@/context/CalendarContext';
-import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { DAYS } from '@/utils/calendarUtils';
 import { applyRecurringStatus } from '@/services/calendarService';
+import { toast } from "@/components/ui/use-toast";
 
 interface CalendarProps {
   className?: string;
@@ -30,6 +31,7 @@ const Calendar = ({ className }: CalendarProps) => {
     currentWeekId,
     refreshCalendarData
   } = useCalendar();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const getSlotStatus = (day: string, time: string): SlotStatus => {
     if (!selectedPerson || !calendarData[currentWeekId]?.[selectedPerson]) return 'neutral';
@@ -90,21 +92,44 @@ const Calendar = ({ className }: CalendarProps) => {
     const status = getSlotStatus(day, time);
     
     // Apply the recurring status to all future weeks
-    // Removed the check that prevents neutral status from being recurring
-    const success = await applyRecurringStatus(
-      currentWeekId,
-      selectedPerson,
-      day,
-      time,
-      status
-    );
-    
-    if (success) {
-      // Refresh calendar data to show updates
-      const updatedData = await refreshCalendarData();
-      if (updatedData) {
-        setCalendarData(updatedData);
+    setIsRefreshing(true);
+    try {
+      const success = await applyRecurringStatus(
+        currentWeekId,
+        selectedPerson,
+        day,
+        time,
+        status
+      );
+      
+      if (success) {
+        // Refresh calendar data to show updates
+        await refreshCalendarData();
       }
+    } catch (error) {
+      console.error('Error applying recurring status:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'application de la récurrence",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshCalendarData();
+      toast({
+        title: "Données actualisées",
+        description: "Le calendrier a été rafraîchi avec succès",
+      });
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -133,7 +158,17 @@ const Calendar = ({ className }: CalendarProps) => {
               <ChevronLeft className="h-5 w-5" />
             </button>
             
-            <h3 className="text-lg font-medium">{formatWeekRange()}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-medium">{formatWeekRange()}</h3>
+              <button
+                onClick={handleManualRefresh}
+                disabled={isRefreshing}
+                className="p-1 rounded-full hover:bg-gray-200 transition-colors"
+                title="Rafraîchir les données"
+              >
+                <RefreshCw className={cn("h-4 w-4 text-gray-500", isRefreshing && "animate-spin")} />
+              </button>
+            </div>
             
             <button 
               onClick={nextWeek}

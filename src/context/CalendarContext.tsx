@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { addWeeks, subWeeks } from 'date-fns';
 import { CalendarContextType, Person, CalendarData } from '@/types/calendar';
 import { SlotStatus } from '@/components/TimeSlot';
@@ -12,6 +12,7 @@ import {
 } from '@/utils/calendarUtils';
 import { fetchCalendarData, updateCalendarEntry } from '@/services/calendarService';
 import useLocalStorage from '@/hooks/useLocalStorage';
+import { toast } from "@/components/ui/use-toast";
 
 const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
 
@@ -51,12 +52,27 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
   const formatWeekRange = () => formatWeekRangeUtil(currentWeek);
 
   // Refresh calendar data from the database
-  const refreshCalendarData = async (): Promise<CalendarData | null> => {
+  const refreshCalendarData = useCallback(async (): Promise<CalendarData | null> => {
     setIsLoading(true);
-    const data = await fetchCalendarData();
-    setIsLoading(false);
-    return data;
-  };
+    try {
+      const data = await fetchCalendarData();
+      if (data) {
+        setCalendarData(data);
+        return data;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error refreshing calendar data:", error);
+      toast({
+        title: "Erreur de rafraîchissement",
+        description: "Impossible de rafraîchir les données du calendrier",
+        variant: "destructive"
+      });
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   // Initialize calendar data structure if needed
   useEffect(() => {
@@ -65,17 +81,45 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
 
   // Fetch initial data from Supabase
   useEffect(() => {
-    const loadCalendarData = async () => {
-      setIsLoading(true);
-      const data = await fetchCalendarData();
-      if (data) {
-        setCalendarData(data);
-      }
-      setIsLoading(false);
-    };
+    refreshCalendarData();
+  }, [refreshCalendarData]);
 
-    loadCalendarData();
-  }, []);
+  // Enhanced setCalendarData function that also updates Supabase
+  const handleSetCalendarData = useCallback(async (newData: React.SetStateAction<CalendarData>) => {
+    // If it's a function, execute it to get the new state
+    const updatedData = typeof newData === 'function' ? newData(calendarData) : newData;
+    
+    try {
+      // Find the differences and update Supabase
+      Object.entries(updatedData).forEach(([weekId, weekData]) => {
+        Object.entries(weekData).forEach(([person, personData]) => {
+          if (person === '') return; // Skip empty person
+          
+          Object.entries(personData).forEach(([day, dayData]) => {
+            Object.entries(dayData).forEach(([timeSlot, status]) => {
+              const oldStatus = calendarData[weekId]?.[person as Person]?.[day]?.[timeSlot];
+              
+              if (oldStatus !== status) {
+                // Only update if the status has changed
+                updateCalendarEntry(weekId, person, day, timeSlot, status)
+                  .catch(err => console.error('Error updating calendar entry:', err));
+              }
+            });
+          });
+        });
+      });
+      
+      // Update local state
+      setCalendarData(updatedData);
+    } catch (error) {
+      console.error('Error updating calendar data:', error);
+      toast({
+        title: "Erreur de sauvegarde",
+        description: "Impossible de sauvegarder les modifications",
+        variant: "destructive"
+      });
+    }
+  }, [calendarData]);
 
   return (
     <CalendarContext.Provider value={{ 
@@ -89,34 +133,7 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
       formatWeekRange,
       currentWeekId,
       refreshCalendarData,
-      setCalendarData: (newData) => {
-        // If it's a function, execute it to get the new state
-        if (typeof newData === 'function') {
-          const updatedData = newData(calendarData);
-          
-          // Find the differences and update Supabase
-          Object.entries(updatedData).forEach(([weekId, weekData]) => {
-            Object.entries(weekData).forEach(([person, personData]) => {
-              if (person === '') return; // Skip empty person
-              
-              Object.entries(personData).forEach(([day, dayData]) => {
-                Object.entries(dayData).forEach(([timeSlot, status]) => {
-                  const oldStatus = calendarData[weekId]?.[person as Person]?.[day]?.[timeSlot];
-                  
-                  if (oldStatus !== status) {
-                    // Only update if the status has changed
-                    updateCalendarEntry(weekId, person, day, timeSlot, status);
-                  }
-                });
-              });
-            });
-          });
-          
-          setCalendarData(updatedData);
-        } else {
-          setCalendarData(newData);
-        }
-      },
+      setCalendarData: handleSetCalendarData,
       isLoading
     }}>
       {children}

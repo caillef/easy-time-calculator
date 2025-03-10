@@ -8,14 +8,19 @@ import { SlotStatus } from "@/components/TimeSlot";
 
 export const fetchCalendarData = async (): Promise<CalendarData | null> => {
   try {
+    // Fetch calendar data without any limits
     const { data, error } = await supabase
       .from('calendar_data')
-      .select('*');
+      .select('*')
+      .order('created_at', { ascending: false });
     
     if (error) {
+      console.error('Error fetching calendar data:', error);
       throw error;
     }
 
+    console.log(`Fetched ${data?.length || 0} calendar records from database`);
+    
     // Transform the data from the database into our app's format
     const transformedData = transformDatabaseData(data);
 
@@ -71,10 +76,10 @@ export const updateCalendarEntry = async (
 };
 
 export const applyRecurringStatus = async (
-  startWeekId: string,
-  person: string,
-  day: string,
-  timeSlot: string,
+  startWeekId: string, 
+  person: string, 
+  day: string, 
+  timeSlot: string, 
   status: SlotStatus,
   weeksToApply: number = 0 // Set to 0 to automatically calculate remaining weeks in current year
 ): Promise<boolean> => {
@@ -134,7 +139,7 @@ export const applyRecurringStatus = async (
     console.log(`Generated ${updates.length} recurring updates for the current year`);
     
     // Process each update individually instead of batching them
-    // This avoids the "ON CONFLICT DO UPDATE command cannot affect row a second time" error
+    let successCount = 0;
     for (const update of updates) {
       const { error } = await supabase
         .from('calendar_data')
@@ -145,9 +150,12 @@ export const applyRecurringStatus = async (
       
       if (error) {
         console.error('Error updating entry', update, error);
-        // Continue with other updates even if one fails
+      } else {
+        successCount++;
       }
     }
+    
+    console.log(`Successfully processed ${successCount} out of ${updates.length} updates`);
     
     toast({
       title: "Récurrence activée",
