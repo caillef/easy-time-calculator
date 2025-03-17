@@ -138,15 +138,24 @@ export const applyRecurringStatus = async (
     
     console.log(`Generated ${updates.length} recurring updates for the current year`);
     
-    // Process each update individually instead of batching them
+    // Process each update individually to ensure we can override existing values
     let successCount = 0;
     for (const update of updates) {
+      // First delete any existing entry to ensure we can override it
+      await supabase
+        .from('calendar_data')
+        .delete()
+        .match({
+          week_id: update.week_id,
+          person,
+          day,
+          time_slot: timeSlot
+        });
+      
+      // Then insert the new value
       const { error } = await supabase
         .from('calendar_data')
-        .upsert(
-          update,
-          { onConflict: 'week_id,person,day,time_slot' }
-        );
+        .insert(update);
       
       if (error) {
         console.error('Error updating entry', update, error);

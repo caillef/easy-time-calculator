@@ -8,6 +8,7 @@ import { Loader2, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { DAYS } from '@/utils/calendarUtils';
 import { applyRecurringStatus } from '@/services/calendarService';
 import { toast } from "@/components/ui/use-toast";
+import { Button } from './ui/button';
 
 interface CalendarProps {
   className?: string;
@@ -105,6 +106,10 @@ const Calendar = ({ className }: CalendarProps) => {
       if (success) {
         // Refresh calendar data to show updates
         await refreshCalendarData();
+        toast({
+          title: "Récurrence appliquée",
+          description: `Les changements ont été appliqués jusqu'à la fin de l'année`,
+        });
       }
     } catch (error) {
       console.error('Error applying recurring status:', error);
