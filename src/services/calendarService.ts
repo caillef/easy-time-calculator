@@ -106,11 +106,8 @@ export const applyRecurringStatus = async (
       console.log(`Auto-calculated ${weeksToApply} remaining weeks in year ${currentYear}`);
     }
     
-    // For all future weeks, first let's delete any existing entries for this timeslot
-    // This ensures we're removing any previous recursions for this timeslot
+    // Generate list of all future week IDs including current week
     const futureWeekIds = [];
-    
-    // Include current week
     futureWeekIds.push(startWeekId);
     
     // Add future week IDs
@@ -122,9 +119,9 @@ export const applyRecurringStatus = async (
       }
     }
     
-    console.log(`Cleaning up ${futureWeekIds.length} weeks for this timeslot`);
+    console.log(`Processing recurring update for ${futureWeekIds.length} weeks`);
     
-    // Delete all future entries for this timeslot
+    // Delete all future entries for this timeslot to clean up previous recursions
     for (const weekId of futureWeekIds) {
       await supabase
         .from('calendar_data')
@@ -137,10 +134,10 @@ export const applyRecurringStatus = async (
         });
     }
     
-    // If the status is 'neutral', we don't need to insert anything since we've already deleted existing entries
-    // This effectively resets the status to neutral for all weeks
+    // If the status is 'neutral', we don't need to insert anything
+    // This effectively resets the status to neutral for all weeks by removing entries
     if (status === 'neutral') {
-      console.log(`Set ${futureWeekIds.length} weeks to neutral by removing entries`);
+      console.log(`Reset ${futureWeekIds.length} weeks to neutral by removing all entries`);
       toast({
         title: "Récurrence réinitialisée",
         description: `Tous les créneaux futurs pour ${day} à ${timeSlot} ont été réinitialisés`,
@@ -148,10 +145,9 @@ export const applyRecurringStatus = async (
       return true;
     }
     
-    // If status is not neutral, create updates for all future weeks
+    // For non-neutral statuses, create and insert new entries for all future weeks
     const updates = [];
     
-    // Add all future weeks including current
     for (const weekId of futureWeekIds) {
       updates.push({
         week_id: weekId,
@@ -167,7 +163,6 @@ export const applyRecurringStatus = async (
     // Process each insert
     let successCount = 0;
     for (const update of updates) {
-      // Insert the new value (we already deleted any existing entries)
       const { error } = await supabase
         .from('calendar_data')
         .insert(update);
@@ -182,7 +177,7 @@ export const applyRecurringStatus = async (
     console.log(`Successfully processed ${successCount} out of ${updates.length} updates`);
     
     toast({
-      title: "Récurrence activée",
+      title: "Récurrence appliquée",
       description: `Ce statut sera appliqué jusqu'à la fin de l'année (${day}, ${timeSlot})`,
     });
     
