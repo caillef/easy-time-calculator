@@ -106,53 +106,68 @@ export const applyRecurringStatus = async (
       console.log(`Auto-calculated ${weeksToApply} remaining weeks in year ${currentYear}`);
     }
     
-    // Create updates batch for future weeks
-    const updates = [];
+    // For all future weeks, first let's delete any existing entries for this timeslot
+    // This ensures we're removing any previous recursions for this timeslot
+    const futureWeekIds = [];
     
-    // Start with the current week
-    updates.push({
-      week_id: startWeekId,
-      person,
-      day,
-      time_slot: timeSlot,
-      status
-    });
+    // Include current week
+    futureWeekIds.push(startWeekId);
     
-    // Add future weeks (limited to end of current year)
+    // Add future week IDs
     for (let i = 1; i <= weeksToApply; i++) {
-      // Calculate the date for the future week
       const futureDate = addWeeks(currentDate, i);
       const futureWeekId = getWeekId(futureDate);
-      
-      // Add to batch updates - make sure we're not adding duplicates
       if (futureWeekId !== startWeekId) {
-        updates.push({
-          week_id: futureWeekId,
-          person,
-          day,
-          time_slot: timeSlot,
-          status
-        });
+        futureWeekIds.push(futureWeekId);
       }
     }
     
-    console.log(`Generated ${updates.length} recurring updates for the current year`);
+    console.log(`Cleaning up ${futureWeekIds.length} weeks for this timeslot`);
     
-    // Process each update individually to ensure we can override existing values
-    let successCount = 0;
-    for (const update of updates) {
-      // First delete any existing entry to ensure we can override it
+    // Delete all future entries for this timeslot
+    for (const weekId of futureWeekIds) {
       await supabase
         .from('calendar_data')
         .delete()
         .match({
-          week_id: update.week_id,
+          week_id: weekId,
           person,
           day,
           time_slot: timeSlot
         });
-      
-      // Then insert the new value
+    }
+    
+    // If the status is 'neutral', we don't need to insert anything since we've already deleted existing entries
+    // This effectively resets the status to neutral for all weeks
+    if (status === 'neutral') {
+      console.log(`Set ${futureWeekIds.length} weeks to neutral by removing entries`);
+      toast({
+        title: "Récurrence réinitialisée",
+        description: `Tous les créneaux futurs pour ${day} à ${timeSlot} ont été réinitialisés`,
+      });
+      return true;
+    }
+    
+    // If status is not neutral, create updates for all future weeks
+    const updates = [];
+    
+    // Add all future weeks including current
+    for (const weekId of futureWeekIds) {
+      updates.push({
+        week_id: weekId,
+        person,
+        day,
+        time_slot: timeSlot,
+        status
+      });
+    }
+    
+    console.log(`Generated ${updates.length} recurring updates with status ${status}`);
+    
+    // Process each insert
+    let successCount = 0;
+    for (const update of updates) {
+      // Insert the new value (we already deleted any existing entries)
       const { error } = await supabase
         .from('calendar_data')
         .insert(update);
